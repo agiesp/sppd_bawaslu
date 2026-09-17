@@ -16,6 +16,9 @@ export default defineConfig({
         transformAssetUrls: {
           includeAbsolute: false,
         },
+        compilerOptions: {
+          isCustomElement: (tag) => tag === 'lord-icon',
+        },
       },
     }),
     vueJsx(),

@@ -177,13 +177,22 @@
                     </svg>
                   </Link>
                   <Link
-                    v-if="item.status === 'draft'"
-                    :href="`/sppd/${item.id}`"
+                    v-if="['draft', 'batal'].includes(item.status) && canEdit(menuUrl)"
+                    :href="`/sppd/${item.id}/edit`"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400"
                     title="Edit"
                   >
                     <EditIcon class="h-4 w-4" />
                   </Link>
+                  <button
+                    v-if="item.status === 'draft' && canDelete(menuUrl)"
+                    type="button"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    title="Hapus"
+                    @click="openDeleteModal(item)"
+                  >
+                    <TrashIcon class="h-4 w-4" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -203,19 +212,76 @@
         :per-page="perPage"
       />
     </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div
+      v-if="deleteTarget"
+      class="fixed inset-0 flex items-center justify-center overflow-y-auto z-99999 px-4"
+    >
+      <div
+        class="fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"
+        @click="closeDeleteModal"
+      ></div>
+      <div
+        class="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+          >
+            <TrashIcon class="h-5 w-5" />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Hapus SPPD
+            </h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Apakah Anda yakin ingin menghapus SPPD
+              <span class="font-semibold text-gray-700 dark:text-gray-200">
+                "{{ deleteTarget?.nomor_sppd }}"
+              </span>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            :disabled="deleting"
+            class="inline-flex items-center justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]"
+            @click="closeDeleteModal"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            :disabled="deleting"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+            @click="confirmDelete"
+          >
+            {{ deleting ? 'Menghapus...' : 'Hapus' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
+  <Toast />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import TablePagination from '@/components/tables/TablePagination.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import Toast from '@/components/ui/Toast.vue'
 import EditIcon from '@/icons/EditIcon.vue'
+import TrashIcon from '@/icons/TrashIcon.vue'
 import { usePermission } from '@/composables/usePermission'
+import { useToast } from '@/composables/useToast'
+import { deleteSppd } from '@/api/sppd'
 import TaskIcon from '@/icons/TaskIcon.vue'
 
 interface SppdItem {
@@ -235,13 +301,40 @@ const props = defineProps<{
   sppdList: SppdItem[]
 }>()
 
-const { canView, canCreate } = usePermission()
+const { canView, canCreate, canEdit, canDelete } = usePermission()
+const { success, error } = useToast()
 const menuUrl = '/sppd'
 
 const search = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 const perPage = 10
+
+const deleteTarget = ref<SppdItem | null>(null)
+const deleting = ref(false)
+
+const openDeleteModal = (item: SppdItem): void => {
+  deleteTarget.value = item
+}
+
+const closeDeleteModal = (): void => {
+  deleteTarget.value = null
+}
+
+const confirmDelete = async (): Promise<void> => {
+  if (!deleteTarget.value || deleting.value) return
+  deleting.value = true
+  try {
+    await deleteSppd(Number(deleteTarget.value.id))
+    success('SPPD berhasil dihapus.')
+    closeDeleteModal()
+    router.reload()
+  } catch {
+    error('Gagal menghapus SPPD. Silakan coba kembali.')
+  } finally {
+    deleting.value = false
+  }
+}
 
 const formatRupiah = (value: number): string => {
   return new Intl.NumberFormat('id-ID', {

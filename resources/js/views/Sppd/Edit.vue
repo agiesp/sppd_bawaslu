@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <AdminLayout>
-    <PageBreadcrumb pageTitle="Buat SPPD" />
+    <PageBreadcrumb pageTitle="Edit SPPD" />
 
     <div
       v-if="page.props.flash?.success"
@@ -16,7 +16,7 @@
         <div class="mb-6">
           <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Data SPPD</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Lengkapi data pelaksana perjalanan dinas.
+            Ubah data pelaksana perjalanan dinas ({{ sppd.nomor_sppd }}).
           </p>
         </div>
 
@@ -384,7 +384,7 @@
           :disabled="saving"
           class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
         >
-          {{ saving ? 'Menyimpan...' : 'Simpan SPPD' }}
+          {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
         </button>
       </div>
     </form>
@@ -399,10 +399,10 @@ import AdminLayout from '../../components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import DatePicker from '@/components/ui/DatePicker.vue'
-import PegawaiSelect, { type PegawaiSelectOption } from '@/components/ui/PegawaiSelect.vue'
-import { calculateSppd, createSppd } from '@/api/sppd'
+import PegawaiSelect from '@/components/ui/PegawaiSelect.vue'
+import { calculateSppd, updateSppd } from '@/api/sppd'
 import type { CalculatePayload, CalculateResult, CalculateRincian, Golongan } from '@/types/sppd'
-import type { Pegawai, Provinsi } from '@/types/pegawai'
+import type { Provinsi } from '@/types/pegawai'
 import { UserCircleIcon, GridIcon, BarChartIcon, UserGroupIcon, FlagIcon, DocsIcon, SendIcon, BoxCubeIcon } from '@/icons'
 
 interface SppdForm {
@@ -417,9 +417,32 @@ interface SppdForm {
   keperluan: string
 }
 
+interface SppdProp {
+  id: number
+  nomor_sppd: string
+  atas_nama: string
+  nip: string | null
+  pangkat_golongan: string | null
+  jabatan: string | null
+  tanggal_mulai: string
+  tanggal_selesai: string
+  tujuan_daerah: string
+  provinsi_tujuan: number
+  keperluan: string | null
+  status: string
+}
+
 const props = defineProps<{
+  sppd: SppdProp
   provinsi: Provinsi[]
-  pegawais: PegawaiSelectOption[]
+  pegawais: {
+    id: number
+    nama_pegawai: string
+    nip: string | null
+    pangkat_golongan: string | null
+    jabatan: string | null
+    avatar_url: string | null
+  }[]
 }>()
 
 interface PagePropsShape {
@@ -435,19 +458,23 @@ const inputClass =
   'w-full rounded-lg border border-gray-300 bg-white px-4 pl-10 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400'
 
 const form = useForm<SppdForm>({
-  atas_nama: '',
-  nip: '',
-  pangkat_golongan: '',
-  jabatan: '',
-  tanggal_mulai: '',
-  tanggal_selesai: '',
-  tujuan_daerah: '',
-  provinsi_tujuan: '',
-  keperluan: '',
+  atas_nama: props.sppd.atas_nama,
+  nip: props.sppd.nip ?? '',
+  pangkat_golongan: props.sppd.pangkat_golongan ?? '',
+  jabatan: props.sppd.jabatan ?? '',
+  tanggal_mulai: props.sppd.tanggal_mulai,
+  tanggal_selesai: props.sppd.tanggal_selesai,
+  tujuan_daerah: props.sppd.tujuan_daerah,
+  provinsi_tujuan: props.sppd.provinsi_tujuan,
+  keperluan: props.sppd.keperluan ?? '',
 })
 
-const selectedPegawaiId = ref<number | ''>('')
-const golongan = ref<Golongan>('eselon_1')
+const selectedPegawaiId = ref<number | ''>(
+  props.sppd.nip
+    ? (props.pegawais.find((p) => p.nip === props.sppd.nip)?.id ?? '')
+    : '',
+)
+const golongan = ref<Golongan>('eselon_4')
 const transportUdara = ref(false)
 const transportDarat = ref(false)
 const taksiBandara = ref(false)
@@ -537,7 +564,7 @@ const handleCalculate = async (): Promise<void> => {
 const handleSimpan = async (): Promise<void> => {
   saving.value = true
   try {
-    await createSppd({
+    await updateSppd(props.sppd.id, {
       atas_nama: form.atas_nama,
       nip: form.nip || null,
       pangkat_golongan: form.pangkat_golongan || null,
@@ -547,6 +574,7 @@ const handleSimpan = async (): Promise<void> => {
       tujuan_daerah: form.tujuan_daerah,
       provinsi_tujuan: Number(form.provinsi_tujuan),
       keperluan: form.keperluan || null,
+      status: props.sppd.status === 'batal' ? 'draft' : undefined,
     })
     form.clearErrors()
     router.visit('/sppd')
@@ -554,6 +582,8 @@ const handleSimpan = async (): Promise<void> => {
     if (isAxiosError(error) && error.response?.status === 422) {
       const errors = error.response.data?.errors ?? {}
       form.clearErrors().setError(errors)
+    } else {
+      calcError.value = 'Gagal menyimpan perubahan. Silakan coba kembali.'
     }
   } finally {
     saving.value = false

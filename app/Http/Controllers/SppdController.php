@@ -83,6 +83,20 @@ class SppdController extends Controller
         ]);
     }
 
+    public function edit(Sppd $sppd): Response
+    {
+        $sppd->load('provinsi');
+
+        $provinsi = RefProvinsi::orderBy('id_provinsi')->get();
+        $pegawais = Pegawai::orderBy('nama_pegawai')->get();
+
+        return Inertia::render('Sppd/Edit', [
+            'sppd' => $sppd,
+            'provinsi' => $provinsi,
+            'pegawais' => $pegawais,
+        ]);
+    }
+
     public function update(Request $request, Sppd $sppd)
     {
         $validated = $request->validate([

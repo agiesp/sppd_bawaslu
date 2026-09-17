@@ -67,17 +67,33 @@
                 <p class="text-xs text-slate-400">Timeline & Rencana SPPD</p>
               </div>
               <div class="flex items-center gap-2">
-                <button class="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
-                <span class="text-xs font-bold text-slate-700 px-2">September 2026</span>
-                <button class="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                <button @click="prevMonth" class="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                <span class="text-xs font-bold text-slate-700 px-2">{{ monthNames[currentMonth] }} {{ currentYear }}</span>
+                <button @click="nextMonth" class="p-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
               </div>
             </div>
 
-            <!-- Date Indicators Horizontal -->
-            <div class="grid grid-cols-7 gap-2 mb-6 text-center">
-              <div v-for="day in calendarDays" :key="day.date" :class="['py-2 rounded-xl transition', day.active ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-50 text-slate-600']">
-                <span class="block text-[10px] uppercase font-medium opacity-80">{{ day.day }}</span>
-                <span class="block text-sm font-bold">{{ day.date }}</span>
+            <!-- Day Names Header -->
+            <div class="grid grid-cols-7 gap-1 mb-2 text-center">
+              <div v-for="dayName in dayNames" :key="dayName" class="text-[10px] uppercase font-semibold text-slate-400 py-1">
+                {{ dayName }}
+              </div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="grid grid-cols-7 gap-1 mb-6">
+              <div v-for="(blank, index) in firstDayOfMonth" :key="'blank-'+index"></div>
+              <div
+                v-for="day in daysInMonth"
+                :key="day"
+                :class="[
+                  'py-1.5 rounded-lg text-center transition text-xs',
+                  isToday(day) ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20 font-bold' :
+                  hasSchedule(day) ? 'bg-indigo-100 text-indigo-700 font-medium' :
+                  'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                ]"
+              >
+                {{ day }}
               </div>
             </div>
 
@@ -162,14 +178,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import AdminLayout from '../components/layout/AdminLayout.vue'
 import BarChartFinancing from '@/components/charts/BarChart/BarChartFinancing.vue'
 
 // Project Top Progress Cards
 const projectCards = ref([
   {
-    title: 'SPPD Pengawasan Pilkada',
+    title: 'SPPD ASN Bawaslu',
     tag: 'Proses',
     tagColor: 'bg-indigo-50 text-indigo-600',
     progress: 75,
@@ -181,7 +197,7 @@ const projectCards = ref([
     time: '2 jam lalu'
   },
   {
-    title: 'SPPD Pemeriksaan Lapangan',
+    title: 'SPPD Komisioner Bawaslu',
     tag: 'Draft',
     tagColor: 'bg-orange-50 text-orange-600',
     progress: 45,
@@ -193,7 +209,7 @@ const projectCards = ref([
     time: '4 jam lalu'
   },
   {
-    title: 'SPPD Rakernas',
+    title: 'SPPD Dalam Daerah',
     tag: 'Selesai',
     tagColor: 'bg-purple-50 text-purple-600',
     progress: 20,
@@ -204,7 +220,7 @@ const projectCards = ref([
     time: '1 hari lalu'
   },
   {
-    title: 'SPPD Bimtek',
+    title: 'SPPD Luar Daerah',
     tag: 'Selesai',
     tagColor: 'bg-emerald-50 text-emerald-600',
     progress: 90,
@@ -217,14 +233,48 @@ const projectCards = ref([
   },
 ])
 
-// Calendar Days Row
-const calendarDays = ref([
-  { day: 'Sen', date: '05', active: false },
-  { day: 'Sel', date: '06', active: false },
-  { day: 'Rab', date: '07', active: false },
-  { day: 'Kam', date: '08', active: true },
-  { day: 'Jum', date: '09', active: false },
-  { day: 'Sab', date: '10', active: false },
-  { day: 'Min', date: '11', active: false },
-])
+// Calendar State
+const currentDate = new Date()
+const currentMonth = ref(currentDate.getMonth())
+const currentYear = ref(currentDate.getFullYear())
+
+const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+
+const firstDayOfMonth = computed(() => new Date(currentYear.value, currentMonth.value, 1).getDay())
+const daysInMonth = computed(() => new Date(currentYear.value, currentMonth.value + 1, 0).getDate())
+
+// Mock schedule data: day of month => schedule description
+const schedules = ref<Record<number, string>>({
+  3: 'Verifikasi Berkas',
+  7: 'Koordinasi Lapangan',
+  10: 'Sosialisasi & Bimtek',
+  14: 'Pengawasan',
+  21: 'Rakernas',
+})
+
+const hasSchedule = (day: number) => Object.prototype.hasOwnProperty.call(schedules.value, day)
+
+const isToday = (day: number) => {
+  const today = new Date()
+  return day === today.getDate() && currentMonth.value === today.getMonth() && currentYear.value === today.getFullYear()
+}
+
+const prevMonth = () => {
+  if (currentMonth.value === 0) {
+    currentMonth.value = 11
+    currentYear.value--
+  } else {
+    currentMonth.value--
+  }
+}
+
+const nextMonth = () => {
+  if (currentMonth.value === 11) {
+    currentMonth.value = 0
+    currentYear.value++
+  } else {
+    currentMonth.value++
+  }
+}
 </script>

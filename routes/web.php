@@ -28,6 +28,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 Route::get('/sppd', [SppdController::class, 'index'])->middleware('auth', 'permission:/sppd:view');
 Route::get('/sppd/buat', [SppdController::class, 'create'])->middleware('auth', 'permission:/sppd:create');
 Route::post('/sppd', [SppdController::class, 'store'])->middleware('auth', 'permission:/sppd:create');
+Route::get('/sppd/{sppd}/edit', [SppdController::class, 'edit'])->middleware('auth', 'permission:/sppd:edit');
 Route::get('/sppd/{sppd}', [SppdController::class, 'show'])->middleware('auth', 'permission:/sppd:view');
 Route::put('/sppd/{sppd}', [SppdController::class, 'update'])->middleware('auth', 'permission:/sppd:edit');
 Route::delete('/sppd/{sppd}', [SppdController::class, 'destroy'])->middleware('auth', 'permission:/sppd:delete');

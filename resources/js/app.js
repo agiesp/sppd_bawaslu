@@ -19,6 +19,8 @@ createInertiaApp({
   setup({ el, App, props, plugin }) {
     const app = createApp({ render: () => h(App, props) })
 
+    app.config.compilerOptions.isCustomElement = (tag) => tag === 'lord-icon'
+
     app.use(plugin)
     app.use(VueApexCharts)
     app.component('RouterLink', RouterLinkCompat)

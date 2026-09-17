@@ -17,7 +17,6 @@
         @endif
         @vite(['resources/js/app.js'])
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="h-full bg-gray-50 dark:bg-dark-900 dark:text-gray-100">
         @inertia

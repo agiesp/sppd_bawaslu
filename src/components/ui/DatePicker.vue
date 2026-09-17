@@ -4,7 +4,12 @@
       :model-value="modelValue"
       :config="config"
       :placeholder="placeholder"
-      class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+      :class="[
+        'w-full rounded-lg border py-2.5 pl-9 pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 dark:text-white/90 dark:placeholder:text-gray-500',
+        error
+          ? 'border-error-500 bg-white/50 focus:border-error-500 focus:ring-error-500/10 dark:bg-white/5'
+          : 'border-gray-300 bg-gray-50 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5',
+      ]"
       @update:model-value="onChange"
     />
     <span
@@ -19,6 +24,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import FlatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
 import { CalenderIcon } from '@/icons'
 import type { Options } from 'flatpickr/dist/types/options'
 
@@ -27,9 +33,11 @@ withDefaults(
     modelValue: string
     placeholder?: string
     config?: Options
+    error?: boolean
   }>(),
   {
     placeholder: 'Pilih tanggal...',
+    error: false,
     config: () => ({
       dateFormat: 'Y-m-d',
       allowInput: true,
