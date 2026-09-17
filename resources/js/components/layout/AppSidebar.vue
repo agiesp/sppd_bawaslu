@@ -1,7 +1,7 @@
 <template>
   <aside
     :class="[
-      'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200',
+      'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-slate-900 text-slate-300 border-r border-slate-800 h-screen transition-all duration-300 ease-in-out z-99999',
       {
         'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
         'lg:w-[90px]': !isExpanded && !isHovered,
@@ -15,7 +15,7 @@
   >
     <div
       :class="[
-        'pt-4 pb-4 flex',
+        'pt-4 pb-4 flex flex-col items-center',
         !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-center',
       ]"
     >
@@ -23,7 +23,7 @@
         <template v-if="isExpanded || isHovered || isMobileOpen">
           <img
             v-if="appLogo"
-            class="h-25 w-auto"
+            class="h-15 w-auto"
             :src="appLogo"
             alt="Logo"
             width="150"
@@ -54,6 +54,17 @@
           height="32"
         />
       </Link>
+      <span
+        v-if="isExpanded || isHovered || isMobileOpen"
+        class="mt-0.5 block max-w-[260px] text-center text-base leading-snug font-semibold"
+      >
+        <span class="text-white ">Sistem Informasi Perjalanan Dinas</span>
+        <span style="color: #fb6514"> Integralisasi</span>
+      </span>
+      <div
+        v-if="isExpanded || isHovered || isMobileOpen"
+        class="mt-3 h-px w-full bg-gradient-to-r from-transparent via-orange-500/70 to-transparent"
+      ></div>
     </div>
     <div class="flex flex-col flex-1 min-h-0 overflow-hidden relative">
       <nav
@@ -65,7 +76,7 @@
           <div v-for="(menuGroup, groupIndex) in regularMenuGroups" :key="groupIndex">
             <h2
               :class="[
-                'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
+                'mb-4 text-xs uppercase flex leading-[20px] text-slate-500',
                 !isExpanded && !isHovered
                   ? 'lg:justify-center'
                   : 'justify-start',
@@ -157,7 +168,7 @@
                       (isExpanded || isHovered || isMobileOpen)
                     "
                   >
-                    <ul class="mt-2 ml-9 space-y-1 border-l-[3px] border-dotted border-[#edecec] pl-3 dark:border-gray-700">
+                    <ul class="mt-2 ml-9 space-y-1 border-l-[3px] border-dotted border-slate-700 pl-3">
                       <li v-for="subItem in item.subItems" :key="subItem.name">
                         <Link
                           :href="subItem.path"
@@ -250,7 +261,7 @@
           <div class="">
             <h2
               :class="[
-                'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
+                'mb-4 text-xs uppercase flex leading-[20px] text-slate-500',
                 !isExpanded && !isHovered
                   ? 'lg:justify-center'
                   : 'justify-start',
@@ -292,7 +303,7 @@
         v-show="hasMoreScroll"
         class="scroll-indicator absolute bottom-0 left-0 right-0 flex items-center justify-center h-10 pointer-events-none z-10"
       >
-        <svg class="w-4 h-4 text-gray-400 animate-bounce" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="w-4 h-4 text-slate-500 animate-bounce" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
@@ -301,7 +312,7 @@
           <div>
             <h2
               :class="[
-                'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
+                'mb-4 text-xs uppercase flex leading-[20px] text-slate-500',
                 !isExpanded && !isHovered
                   ? 'lg:justify-center'
                   : 'justify-start',
@@ -390,7 +401,7 @@
                       (isExpanded || isHovered || isMobileOpen)
                     "
                   >
-                    <ul class="mt-2 ml-9 space-y-1 border-l-[3px] border-dotted border-[#edecec] pl-3 dark:border-gray-700">
+                    <ul class="mt-2 ml-9 space-y-1 border-l-[3px] border-dotted border-slate-700 pl-3">
                       <li v-for="subItem in item.subItems" :key="subItem.name">
                         <Link
                           :href="subItem.path"
