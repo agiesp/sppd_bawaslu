@@ -29,7 +29,7 @@ const formatRupiah = (value) =>
   }).format(value)
 
 const chartOptions = ref({
-  colors: ['#fb6514', '#465fff'],
+  colors: ['#fb6514', '#fd853a'],
   chart: {
     fontFamily: 'Outfit, sans-serif',
     type: 'bar',

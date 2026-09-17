@@ -6,7 +6,7 @@
     <div class="flex items-center gap-2">
       <select
         :value="perPage"
-        class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+        class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
         @change="onPerPageChange(($event.target as HTMLSelectElement).value)"
       >
         <option :value="10">10</option>
@@ -28,7 +28,7 @@
           type="button"
           class="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-medium transition-colors"
           :class="page === currentPage
-            ? 'border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-900/30 dark:text-blue-400'
+            ? 'border-brand-500 bg-brand-50 text-brand-500 dark:border-brand-500 dark:bg-brand-500/20 dark:text-brand-400'
             : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'"
           @click="goTo(page)"
         >

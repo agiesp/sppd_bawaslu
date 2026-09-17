@@ -2,6 +2,8 @@ import type { Provinsi, Pegawai } from './pegawai'
 
 export type SppdStatus = 'draft' | 'proses' | 'selesai' | 'batal'
 
+export type FileDokumenJenis = 'surat_tugas' | 'sppd'
+
 export interface SppdRincian {
   id: number
   id_sppd: number
@@ -11,6 +13,8 @@ export interface SppdRincian {
   satuan: number
   jumlah: number
   keterangan: string | null
+  bukti: string | null
+  bukti_url: string | null
 }
 
 export interface Sppd {
@@ -28,6 +32,16 @@ export interface Sppd {
   provinsi_tujuan: number
   keperluan: string | null
   status: SppdStatus
+  transport_udara?: boolean
+  transport_darat_pp?: boolean
+  taksi_bandara?: boolean
+  golongan?: Golongan | null
+  kota_asal_pesawat?: string | null
+  kota_tujuan_pesawat?: string | null
+  file_surat_tugas?: string | null
+  file_sppd?: string | null
+  file_surat_tugas_url?: string | null
+  file_sppd_url?: string | null
   total_biaya: number
   created_by: number | null
   approved_by: number | null
@@ -42,6 +56,7 @@ export interface Sppd {
 }
 
 export interface SppdPayload {
+  nomor_sppd?: string | null
   atas_nama: string
   nip?: string | null
   pangkat_golongan?: string | null
@@ -51,6 +66,12 @@ export interface SppdPayload {
   tujuan_daerah: string
   provinsi_tujuan: number
   keperluan?: string | null
+  transport_udara?: boolean
+  transport_darat_pp?: boolean
+  taksi_bandara?: boolean
+  golongan?: Golongan | null
+  kota_asal_pesawat?: string | null
+  kota_tujuan_pesawat?: string | null
 }
 
 export type Golongan = 'eselon_1' | 'eselon_2' | 'eselon_3' | 'eselon_4'
@@ -65,6 +86,8 @@ export interface CalculatePayload {
   taksi_bandara?: boolean
   kota_asal_pesawat?: string | null
   kota_tujuan_pesawat?: string | null
+  uang_saku?: number
+  uang_saku_hari?: number
 }
 
 export interface CalculateRincian {
@@ -74,6 +97,8 @@ export interface CalculateRincian {
   satuan: number
   jumlah: number
   keterangan: string
+  bukti?: string | null
+  bukti_url?: string | null
 }
 
 export interface CalculateResult {

@@ -33,6 +33,9 @@ Route::get('/sppd/{sppd}', [SppdController::class, 'show'])->middleware('auth', 
 Route::put('/sppd/{sppd}', [SppdController::class, 'update'])->middleware('auth', 'permission:/sppd:edit');
 Route::delete('/sppd/{sppd}', [SppdController::class, 'destroy'])->middleware('auth', 'permission:/sppd:delete');
 Route::post('/sppd/{sppd}/rincian', [SppdController::class, 'storeRincian'])->middleware('auth', 'permission:/sppd:edit');
+Route::post('/sppd/bukti', [SppdController::class, 'uploadBukti'])->middleware('auth');
+Route::post('/sppd/{sppd}/dokumen', [SppdController::class, 'uploadDokumen'])->middleware('auth', 'permission:/sppd:edit');
+Route::delete('/sppd/{sppd}/dokumen', [SppdController::class, 'hapusDokumen'])->middleware('auth', 'permission:/sppd:edit');
 Route::get('/sppd/{sppd}/cetak', [SppdController::class, 'cetak'])->middleware('auth', 'permission:/sppd:view');
 
 // Referensi

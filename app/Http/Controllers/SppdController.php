@@ -11,6 +11,7 @@ use App\Models\RefTarifPesawat;
 use App\Models\RefTarifTransportDarat;
 use App\Models\RefTarifTransportProvinsi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,7 +21,7 @@ class SppdController extends Controller
 {
     public function index(): Response
     {
-        $sppdList = Sppd::with('provinsi')
+        $sppdList = Sppd::with(['provinsi', 'pegawai'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -52,6 +53,13 @@ class SppdController extends Controller
             'tujuan_daerah' => 'required|string|max:100',
             'provinsi_tujuan' => 'required|integer|exists:ref_provinsi,id_provinsi',
             'keperluan' => 'nullable|string',
+            'nomor_sppd' => 'nullable|string|max:50|unique:tb_sppd,nomor_sppd',
+            'transport_udara' => 'nullable|boolean',
+            'transport_darat_pp' => 'nullable|boolean',
+            'taksi_bandara' => 'nullable|boolean',
+            'golongan' => 'nullable|in:eselon_1,eselon_2,eselon_3,eselon_4',
+            'kota_asal_pesawat' => 'nullable|string|max:100',
+            'kota_tujuan_pesawat' => 'nullable|string|max:100',
         ]);
 
         $lamaHari = (int) \Carbon\Carbon::parse($validated['tanggal_mulai'])->diffInDays($validated['tanggal_selesai']) + 1;
@@ -61,7 +69,7 @@ class SppdController extends Controller
         $validated['total_biaya'] = 0;
         $validated['created_by'] = $request->user()->id;
 
-        $validated['nomor_sppd'] = $this->generateNomor();
+        $validated['nomor_sppd'] = !empty($validated['nomor_sppd']) ? $validated['nomor_sppd'] : $this->generateNomor();
 
         $sppd = Sppd::create($validated);
 
@@ -85,12 +93,12 @@ class SppdController extends Controller
 
     public function edit(Sppd $sppd): Response
     {
-        $sppd->load('provinsi');
+        $sppd->load(['provinsi', 'rincian']);
 
         $provinsi = RefProvinsi::orderBy('id_provinsi')->get();
         $pegawais = Pegawai::orderBy('nama_pegawai')->get();
 
-        return Inertia::render('Sppd/Edit', [
+        return Inertia::render('Sppd/Create', [
             'sppd' => $sppd,
             'provinsi' => $provinsi,
             'pegawais' => $pegawais,
@@ -110,6 +118,13 @@ class SppdController extends Controller
             'provinsi_tujuan' => 'sometimes|integer|exists:ref_provinsi,id_provinsi',
             'keperluan' => 'nullable|string',
             'status' => 'sometimes|in:draft,proses,selesai,batal',
+            'nomor_sppd' => 'sometimes|nullable|string|max:50|unique:tb_sppd,nomor_sppd,' . $sppd->id,
+            'transport_udara' => 'nullable|boolean',
+            'transport_darat_pp' => 'nullable|boolean',
+            'taksi_bandara' => 'nullable|boolean',
+            'golongan' => 'nullable|in:eselon_1,eselon_2,eselon_3,eselon_4',
+            'kota_asal_pesawat' => 'nullable|string|max:100',
+            'kota_tujuan_pesawat' => 'nullable|string|max:100',
         ]);
 
         if (isset($validated['tanggal_mulai'], $validated['tanggal_selesai'])) {
@@ -147,6 +162,8 @@ class SppdController extends Controller
             'taksi_bandara' => 'nullable|boolean',
             'kota_asal_pesawat' => 'nullable|string',
             'kota_tujuan_pesawat' => 'nullable|string',
+            'uang_saku' => 'nullable|numeric|min:0',
+            'uang_saku_hari' => 'nullable|integer|min:0',
         ]);
 
         $provinsi = RefProvinsi::find($validated['provinsi_tujuan']);
@@ -186,11 +203,17 @@ class SppdController extends Controller
             $pesawat = RefTarifPesawat::whereRaw('UPPER(kota_asal) = ?', [$asal])
                 ->whereRaw('UPPER(kota_tujuan) = ?', [$tujuan])->first();
 
-            if ($pesawat) {
-                $rincian[] = ['jenis_biaya' => 'transport_udara_pergi', 'uraian' => "Transportasi Udara (Pergi) $asal - $tujuan", 'hari' => 1, 'satuan' => $pesawat->tarif_ekonomi, 'jumlah' => $pesawat->tarif_ekonomi, 'keterangan' => 'Terlampir'];
-                $rincian[] = ['jenis_biaya' => 'transport_udara_pulang', 'uraian' => "Transportasi Udara (Pulang) $tujuan - $asal", 'hari' => 1, 'satuan' => $pesawat->tarif_ekonomi, 'jumlah' => $pesawat->tarif_ekonomi, 'keterangan' => 'Terlampir'];
-                $total += $pesawat->tarif_ekonomi * 2;
+            if (!$pesawat) {
+                $pesawat = RefTarifPesawat::whereRaw('UPPER(kota_asal) = ?', [$tujuan])
+                    ->whereRaw('UPPER(kota_tujuan) = ?', [$asal])->first();
             }
+
+            $tarifPesawat = $pesawat ? $pesawat->tarif_ekonomi : 0;
+            $keteranganPesawat = $pesawat ? 'Terlampir' : 'Tarif tidak ditemukan';
+
+            $rincian[] = ['jenis_biaya' => 'transport_udara_pergi', 'uraian' => "Transportasi Udara (Pergi) $asal - $tujuan", 'hari' => 1, 'satuan' => $tarifPesawat, 'jumlah' => $tarifPesawat, 'keterangan' => $keteranganPesawat];
+            $rincian[] = ['jenis_biaya' => 'transport_udara_pulang', 'uraian' => "Transportasi Udara (Pulang) $tujuan - $asal", 'hari' => 1, 'satuan' => $tarifPesawat, 'jumlah' => $tarifPesawat, 'keterangan' => $keteranganPesawat];
+            $total += $tarifPesawat * 2;
         }
 
         if (!empty($validated['transport_darat_pp'])) {
@@ -216,6 +239,15 @@ class SppdController extends Controller
             $total += $taksi;
         }
 
+        $uangSaku = (int) ($validated['uang_saku'] ?? 0);
+        $uangSakuHari = (int) ($validated['uang_saku_hari'] ?? 0);
+        if ($uangSaku > 0 || $uangSakuHari > 0) {
+            $hariUangSaku = $uangSakuHari > 0 ? $uangSakuHari : $lamaHari;
+            $jumlahUangSaku = $uangSaku * $hariUangSaku;
+            $rincian[] = ['jenis_biaya' => 'uang_saku', 'uraian' => 'Uang Saku', 'hari' => $hariUangSaku, 'satuan' => $uangSaku, 'jumlah' => $jumlahUangSaku, 'keterangan' => 'Manual'];
+            $total += $jumlahUangSaku;
+        }
+
         return response()->json([
             'rincian' => $rincian,
             'total_biaya' => $total,
@@ -234,6 +266,7 @@ class SppdController extends Controller
             'rincian.*.satuan' => 'required|integer|min:0',
             'rincian.*.jumlah' => 'required|integer|min:0',
             'rincian.*.keterangan' => 'nullable|string',
+            'rincian.*.bukti' => 'nullable|string|max:255',
         ]);
 
         $sppd->rincian()->delete();
@@ -249,6 +282,70 @@ class SppdController extends Controller
             'message' => 'Rincian biaya berhasil disimpan.',
             'sppd' => $sppd->fresh('rincian'),
         ]);
+    }
+
+    public function uploadBukti(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $path = $request->file('file')->store('sppd/bukti', 'public');
+
+        return response()->json([
+            'message' => 'Bukti berhasil diunggah.',
+            'path' => $path,
+            'url' => '/storage/' . ltrim($path, '/'),
+        ]);
+    }
+
+    public function uploadDokumen(Request $request, Sppd $sppd)
+    {
+        $validated = $request->validate([
+            'jenis' => 'required|in:surat_tugas,sppd',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
+        ]);
+
+        $column = $this->dokumenColumn($validated['jenis']);
+
+        if ($sppd->{$column}) {
+            Storage::disk('public')->delete($sppd->{$column});
+        }
+
+        $path = $request->file('file')->store('sppd/dokumen', 'public');
+        $sppd->update([$column => $path]);
+
+        return response()->json([
+            'message' => 'Dokumen berhasil diunggah.',
+            'jenis' => $validated['jenis'],
+            'path' => $path,
+            'url' => '/storage/' . ltrim($path, '/'),
+        ]);
+    }
+
+    public function hapusDokumen(Request $request, Sppd $sppd)
+    {
+        $validated = $request->validate([
+            'jenis' => 'required|in:surat_tugas,sppd',
+        ]);
+
+        $column = $this->dokumenColumn($validated['jenis']);
+
+        if ($sppd->{$column}) {
+            Storage::disk('public')->delete($sppd->{$column});
+        }
+
+        $sppd->update([$column => null]);
+
+        return response()->json([
+            'message' => 'Dokumen berhasil dihapus.',
+            'jenis' => $validated['jenis'],
+        ]);
+    }
+
+    private function dokumenColumn(string $jenis): string
+    {
+        return $jenis === 'surat_tugas' ? 'file_surat_tugas' : 'file_sppd';
     }
 
     public function cetak(Sppd $sppd): Response

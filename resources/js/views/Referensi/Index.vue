@@ -126,7 +126,7 @@
                     </template>
                     <template v-else>
                       <button
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-500/30"
                         @click="startHarian(item)"
                       >
                         <EditIcon class="h-3.5 w-3.5" />
@@ -220,7 +220,7 @@
                     </template>
                     <template v-else>
                       <button
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-500/30"
                         @click="startPenginapan(item)"
                       >
                         <EditIcon class="h-3.5 w-3.5" />
@@ -304,7 +304,7 @@
                     </template>
                     <template v-else>
                       <button
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-500/30"
                         @click="startPesawat(item)"
                       >
                         <EditIcon class="h-3.5 w-3.5" />
@@ -381,7 +381,7 @@
                     </template>
                     <template v-else>
                       <button
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-500/30"
                         @click="startTransportDarat(item)"
                       >
                         <EditIcon class="h-3.5 w-3.5" />
@@ -454,7 +454,7 @@
                     </template>
                     <template v-else>
                       <button
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-600 hover:shadow-md hover:shadow-blue-500/30"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-brand-600 hover:shadow-md hover:shadow-brand-500/30"
                         @click="startTransportProvinsi(item)"
                       >
                         <EditIcon class="h-3.5 w-3.5" />

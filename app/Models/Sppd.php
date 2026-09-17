@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,8 +15,31 @@ class Sppd extends Model
         'tanggal_mulai', 'tanggal_selesai', 'lama_hari',
         'asal_daerah', 'tujuan_daerah', 'provinsi_tujuan', 'keperluan',
         'status', 'total_biaya',
+        'transport_udara', 'transport_darat_pp', 'taksi_bandara',
+        'golongan', 'kota_asal_pesawat', 'kota_tujuan_pesawat',
+        'file_surat_tugas', 'file_sppd',
         'created_by', 'approved_by', 'paid_by',
     ];
+
+    protected $appends = ['file_surat_tugas_url', 'file_sppd_url'];
+
+    protected function fileSuratTugasUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->file_surat_tugas
+                ? '/storage/' . ltrim($this->file_surat_tugas, '/')
+                : null,
+        );
+    }
+
+    protected function fileSppdUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->file_sppd
+                ? '/storage/' . ltrim($this->file_sppd, '/')
+                : null,
+        );
+    }
 
     protected function casts(): array
     {
@@ -25,7 +49,15 @@ class Sppd extends Model
             'lama_hari' => 'integer',
             'provinsi_tujuan' => 'integer',
             'total_biaya' => 'integer',
+            'transport_udara' => 'boolean',
+            'transport_darat_pp' => 'boolean',
+            'taksi_bandara' => 'boolean',
         ];
+    }
+
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d');
     }
 
     public function rincian(): HasMany
@@ -51,5 +83,10 @@ class Sppd extends Model
     public function provinsi(): BelongsTo
     {
         return $this->belongsTo(RefProvinsi::class, 'provinsi_tujuan');
+    }
+
+    public function pegawai(): BelongsTo
+    {
+        return $this->belongsTo(Pegawai::class, 'nip', 'nip');
     }
 }

@@ -1,50 +1,50 @@
 <template>
-  <div
-    class="inline-flex w-full items-center overflow-hidden rounded-lg border transition-all duration-200"
-    :class="[
-      focused
-        ? 'border-brand-500 shadow-sm shadow-brand-500/10'
-        : 'border-gray-300 dark:border-gray-600',
-    ]"
-  >
+  <div class="relative">
     <span
-      class="flex h-full select-none items-center border-r border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500"
+      class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-sm font-medium text-gray-500 dark:text-gray-400"
     >
       Rp
     </span>
     <input
-      :value="display"
+      :id="id"
+      :value="displayValue"
       type="text"
       inputmode="numeric"
+      autocomplete="off"
       :placeholder="placeholder"
-      class="w-full min-w-0 border-0 bg-white px-3 py-2 text-sm font-medium text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
-      @focus="focused = true"
-      @blur="focused = false"
+      class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-right text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400"
       @input="onInput"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
-const props = defineProps<{
-  modelValue?: number | null
-  placeholder?: string
+const props = withDefaults(
+  defineProps<{
+    modelValue: number | null | undefined
+    id?: string
+    placeholder?: string
+  }>(),
+  {
+    modelValue: 0,
+    id: undefined,
+    placeholder: '0',
+  },
+)
+
+const emit = defineEmits<{
+  'update:modelValue': [value: number]
 }>()
 
-const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()
-
-const focused = ref(false)
-
-const display = computed(() => {
-  const v = props.modelValue ?? 0
-  return new Intl.NumberFormat('id-ID').format(v)
+const displayValue = computed<string>(() => {
+  const value = Number(props.modelValue) || 0
+  return value > 0 ? new Intl.NumberFormat('id-ID').format(value) : ''
 })
 
-function onInput(e: Event) {
-  const el = e.target as HTMLInputElement
-  const digits = el.value.replace(/\D/g, '').slice(0, 15)
-  emit('update:modelValue', digits === '' ? 0 : parseInt(digits, 10))
+const onInput = (event: Event): void => {
+  const raw = (event.target as HTMLInputElement).value.replace(/\D/g, '')
+  emit('update:modelValue', raw ? Number.parseInt(raw, 10) : 0)
 }
 </script>

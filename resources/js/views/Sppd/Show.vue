@@ -22,7 +22,7 @@
         </Link>
         <Link
           :href="`/sppd/${sppd.id}/cetak`"
-          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
         >
           Cetak SPPD
         </Link>
@@ -117,7 +117,7 @@
             v-if="sppd.status === 'draft' && canEdit(menuUrl)"
             type="button"
             :disabled="updatingStatus"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
             @click="changeStatus('proses')"
           >
             Kirim / Proses SPPD
@@ -143,6 +143,31 @@
           <p v-if="canEdit(menuUrl) || canDelete(menuUrl)" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
             Ubah status untuk melanjutkan alur persetujuan SPPD.
           </p>
+
+          <div class="mt-1 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Kelengkapan Dokumen
+            </h4>
+            <div class="flex flex-col gap-4">
+              <FileDropzone
+                label="Surat Tugas"
+                :url="sppd.file_surat_tugas_url"
+                :editable="canEdit(menuUrl)"
+                :busy="uploadingJenis === 'surat_tugas'"
+                @select="handleDokumenSelected('surat_tugas', $event)"
+                @remove="handleDokumenRemove('surat_tugas')"
+              />
+              <FileDropzone
+                label="SPPD"
+                :url="sppd.file_sppd_url"
+                :editable="canEdit(menuUrl)"
+                :busy="uploadingJenis === 'sppd'"
+                @select="handleDokumenSelected('sppd', $event)"
+                @remove="handleDokumenRemove('sppd')"
+              />
+            </div>
+            <p v-if="dokumenError" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ dokumenError }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -160,6 +185,18 @@
         </button>
       </div>
 
+      <input
+        ref="buktiInput"
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        class="hidden"
+        @change="onBuktiSelected"
+      />
+
+      <p v-if="uploadError" class="mb-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">
+        {{ uploadError }}
+      </p>
+
       <div v-if="showCalcForm" class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.03]">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
@@ -172,7 +209,7 @@
               </span>
               <select
                 v-model="calcForm.provinsi_tujuan"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               >
               <option v-for="item in provinsi" :key="item.id_provinsi" :value="item.id_provinsi">
                 {{ item.nama_provinsi }}
@@ -191,7 +228,7 @@
               <input
                 v-model="calcForm.tanggal_mulai"
                 type="date"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               />
             </div>
           </div>
@@ -206,7 +243,7 @@
               <input
                 v-model="calcForm.tanggal_selesai"
                 type="date"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               />
             </div>
           </div>
@@ -220,7 +257,7 @@
               </span>
               <select
                 v-model="calcForm.golongan"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               >
               <option v-for="opt in golonganOptions" :key="opt.value" :value="opt.value">
                 {{ opt.label }}
@@ -240,7 +277,7 @@
                 v-model="calcForm.kota_asal_pesawat"
                 type="text"
                 placeholder="Contoh: Banda Aceh"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               />
             </div>
           </div>
@@ -256,7 +293,7 @@
                 v-model="calcForm.kota_tujuan_pesawat"
                 type="text"
                 placeholder="Contoh: Jakarta"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400"
               />
             </div>
           </div>
@@ -264,15 +301,15 @@
 
         <div class="mt-4 flex flex-wrap items-center gap-5">
           <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input v-model="calcForm.transport_udara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900" />
+            <input v-model="calcForm.transport_udara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900" />
             Transport Udara
           </label>
           <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input v-model="calcForm.transport_darat_pp" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900" />
+            <input v-model="calcForm.transport_darat_pp" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900" />
             Transport Darat PP (Lokal Tujuan)
           </label>
           <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input v-model="calcForm.taksi_bandara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900" />
+            <input v-model="calcForm.taksi_bandara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900" />
             Taksi Bandara
           </label>
         </div>
@@ -281,7 +318,7 @@
           <button
             type="button"
             :disabled="calculating"
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
             @click="handleCalculate"
           >
             {{ calculating ? 'Menghitung...' : 'Hitung Rincian' }}
@@ -309,6 +346,7 @@
                 <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Satuan</th>
                 <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Jumlah</th>
                 <th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Keterangan</th>
+                <th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bukti</th>
               </tr>
             </thead>
             <tbody>
@@ -319,6 +357,41 @@
                 <td class="px-3 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatRupiah(item.satuan) }}</td>
                 <td class="px-3 py-2 text-right text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatRupiah(item.jumlah) }}</td>
                 <td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{{ item.keterangan }}</td>
+                <td class="px-3 py-2">
+                  <div class="flex items-center justify-center gap-2">
+                    <template v-if="item.bukti_url">
+                      <a
+                        :href="item.bukti_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:underline dark:text-brand-400"
+                        title="Lihat bukti"
+                      >
+                        <PaperclipIcon class="h-4 w-4" />
+                        Lihat
+                      </a>
+                      <button
+                        type="button"
+                        class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
+                        title="Hapus bukti"
+                        @click="removeBukti('calc', index)"
+                      >
+                        <TrashIcon class="h-4 w-4" />
+                      </button>
+                    </template>
+                    <button
+                      v-else
+                      type="button"
+                      :disabled="uploadingKey === `calc-${index}`"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+                      title="Unggah bukti"
+                      @click="triggerUpload('calc', index)"
+                    >
+                      <PaperclipIcon class="h-3.5 w-3.5" />
+                      {{ uploadingKey === `calc-${index}` ? 'Mengunggah...' : 'Upload' }}
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
             <tfoot>
@@ -326,9 +399,10 @@
                 <td colspan="4" class="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">Total Biaya</td>
                 <td class="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatRupiah(calcResult.total_biaya) }}</td>
                 <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">Lama: {{ calcResult.lama_hari }} hari</td>
+                <td class="px-3 py-2"></td>
               </tr>
               <tr v-if="calcResult.terbilang">
-                <td colspan="6" class="px-3 py-2 text-sm italic text-gray-600 dark:text-gray-400">
+                <td colspan="7" class="px-3 py-2 text-sm italic text-gray-600 dark:text-gray-400">
                   Terbilang: {{ calcResult.terbilang }}
                 </td>
               </tr>
@@ -347,6 +421,7 @@
               <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Satuan</th>
               <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Jumlah</th>
               <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Keterangan</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bukti</th>
             </tr>
           </thead>
           <tbody>
@@ -357,13 +432,49 @@
               <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatRupiah(item.satuan) }}</td>
               <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatRupiah(item.jumlah) }}</td>
               <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ item.keterangan || '-' }}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-center gap-2">
+                  <a
+                    v-if="item.bukti_url"
+                    :href="item.bukti_url"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+                    title="Lihat bukti"
+                  >
+                    <PaperclipIcon class="h-4 w-4" />
+                    Lihat
+                  </a>
+                  <button
+                    v-if="canEdit(menuUrl) && item.bukti_url"
+                    type="button"
+                    class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
+                    title="Hapus bukti"
+                    @click="removeBukti('saved', index)"
+                  >
+                    <TrashIcon class="h-4 w-4" />
+                  </button>
+                  <button
+                    v-else-if="canEdit(menuUrl)"
+                    type="button"
+                    :disabled="uploadingKey === `saved-${index}`"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+                    title="Unggah bukti"
+                    @click="triggerUpload('saved', index)"
+                  >
+                    <PaperclipIcon class="h-3.5 w-3.5" />
+                    {{ uploadingKey === `saved-${index}` ? 'Mengunggah...' : 'Upload' }}
+                  </button>
+                  <span v-if="!item.bukti_url && !canEdit(menuUrl)" class="text-xs text-gray-400 dark:text-gray-500">-</span>
+                </div>
+              </td>
             </tr>
           </tbody>
           <tfoot>
             <tr class="bg-gray-50 dark:bg-white/[0.04]">
               <td colspan="4" class="px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">Total Biaya</td>
               <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatRupiah(sppd.total_biaya) }}</td>
-              <td class="px-4 py-3"></td>
+              <td class="px-4 py-3" colspan="2"></td>
             </tr>
           </tfoot>
         </table>
@@ -379,8 +490,9 @@ import AdminLayout from '../../components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { calculateSppd, storeRincian, updateSppd } from '@/api/sppd'
-import type { CalculatePayload, Golongan, CalculateResult } from '@/types/sppd'
+import FileDropzone from '@/components/ui/FileDropzone.vue'
+import { calculateSppd, storeRincian, updateSppd, uploadBukti, uploadDokumen, deleteDokumen } from '@/api/sppd'
+import type { CalculatePayload, Golongan, CalculateResult, FileDokumenJenis } from '@/types/sppd'
 import { router, Link } from '@inertiajs/vue3'
 import { usePermission } from '@/composables/usePermission'
 import FlagIcon from '@/icons/FlagIcon.vue'
@@ -388,6 +500,8 @@ import CalenderIcon from '@/icons/CalenderIcon.vue'
 import BarChartIcon from '@/icons/BarChartIcon.vue'
 import SendIcon from '@/icons/SendIcon.vue'
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue'
+import PaperclipIcon from '@/icons/PaperclipIcon.vue'
+import TrashIcon from '@/icons/TrashIcon.vue'
 
 interface SppdProp {
   id: number
@@ -406,6 +520,10 @@ interface SppdProp {
   status: 'draft' | 'proses' | 'selesai' | 'batal'
   total_biaya: number
   created_at: string
+  file_surat_tugas?: string | null
+  file_sppd?: string | null
+  file_surat_tugas_url?: string | null
+  file_sppd_url?: string | null
   provinsi?: { id_provinsi: number; nama_provinsi: string } | null
   rincian?: {
     id: number
@@ -415,6 +533,8 @@ interface SppdProp {
     satuan: number
     jumlah: number
     keterangan: string | null
+    bukti: string | null
+    bukti_url: string | null
   }[]
   creator?: { id: number; name: string } | null
   approver?: { id: number; name: string } | null
@@ -488,6 +608,99 @@ const calcResult = ref<CalculateResult | null>(null)
 const calcError = ref('')
 const savingRincian = ref(false)
 const updatingStatus = ref(false)
+const buktiInput = ref<HTMLInputElement | null>(null)
+const uploadTarget = ref<{ scope: 'saved' | 'calc'; index: number } | null>(null)
+const uploadingKey = ref<string | null>(null)
+const uploadError = ref('')
+const uploadingJenis = ref<FileDokumenJenis | null>(null)
+const dokumenError = ref('')
+
+const handleDokumenSelected = async (jenis: FileDokumenJenis, file: File): Promise<void> => {
+  uploadingJenis.value = jenis
+  dokumenError.value = ''
+  try {
+    await uploadDokumen(props.sppd.id, jenis, file)
+    router.reload()
+  } catch {
+    const nama = jenis === 'surat_tugas' ? 'Surat Tugas' : 'SPPD'
+    dokumenError.value = `Gagal mengunggah dokumen ${nama}. Gunakan format PDF/JPG/PNG/WEBP maksimal 10 MB.`
+  } finally {
+    uploadingJenis.value = null
+  }
+}
+
+const handleDokumenRemove = async (jenis: FileDokumenJenis): Promise<void> => {
+  const nama = jenis === 'surat_tugas' ? 'Surat Tugas' : 'SPPD'
+  if (!window.confirm(`Hapus dokumen ${nama}?`)) return
+  uploadingJenis.value = jenis
+  dokumenError.value = ''
+  try {
+    await deleteDokumen(props.sppd.id, jenis)
+    router.reload()
+  } catch {
+    dokumenError.value = 'Gagal menghapus dokumen. Silakan coba lagi.'
+  } finally {
+    uploadingJenis.value = null
+  }
+}
+
+const triggerUpload = (scope: 'saved' | 'calc', index: number): void => {
+  uploadTarget.value = { scope, index }
+  uploadError.value = ''
+  buktiInput.value?.click()
+}
+
+const onBuktiSelected = async (event: Event): Promise<void> => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  const target = uploadTarget.value
+  if (!file || !target) return
+  uploadingKey.value = `${target.scope}-${target.index}`
+  uploadError.value = ''
+  try {
+    const res = await uploadBukti(file)
+    if (target.scope === 'calc') {
+      const item = calcResult.value?.rincian[target.index]
+      if (item) {
+        item.bukti = res.path
+        item.bukti_url = res.url
+      }
+    } else {
+      const list = (props.sppd.rincian ?? []).map((item, index) =>
+        index === target.index ? { ...item, bukti: res.path, bukti_url: res.url } : item,
+      )
+      await storeRincian(props.sppd.id, list)
+      router.reload()
+    }
+  } catch {
+    uploadError.value = 'Gagal mengunggah bukti. Gunakan format PDF/JPG/PNG/WEBP maksimal 5 MB.'
+  } finally {
+    uploadingKey.value = null
+    uploadTarget.value = null
+  }
+}
+
+const removeBukti = async (scope: 'saved' | 'calc', index: number): Promise<void> => {
+  uploadError.value = ''
+  if (scope === 'calc') {
+    const item = calcResult.value?.rincian[index]
+    if (item) {
+      item.bukti = null
+      item.bukti_url = null
+    }
+    return
+  }
+  const list = (props.sppd.rincian ?? []).map((item, i) =>
+    i === index ? { ...item, bukti: null, bukti_url: null } : item,
+  )
+  try {
+    await storeRincian(props.sppd.id, list)
+    router.reload()
+  } catch {
+    uploadError.value = 'Gagal menghapus bukti. Silakan coba lagi.'
+  }
+}
 
 const handleCalculate = async (): Promise<void> => {
   calculating.value = true

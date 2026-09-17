@@ -1,6 +1,6 @@
 ﻿<template>
   <AdminLayout>
-    <PageBreadcrumb pageTitle="Buat SPPD" />
+    <PageBreadcrumb :pageTitle="pageTitle" />
 
     <div
       v-if="page.props.flash?.success"
@@ -16,7 +16,7 @@
         <div class="mb-6">
           <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Data SPPD</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Lengkapi data pelaksana perjalanan dinas.
+            {{ deskripsiData }}
           </p>
         </div>
 
@@ -26,6 +26,29 @@
               Pilih Pegawai <span class="text-xs font-normal text-gray-400 dark:text-gray-500">(opsional, isi otomatis)</span>
             </label>
             <PegawaiSelect v-model="selectedPegawaiId" :pegawais="pegawais" @change="onPegawaiChange" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label for="nomor_sppd" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Nomor SPPD <span v-if="!isEdit" class="text-xs font-normal text-gray-400 dark:text-gray-500">(opsional, dibuat otomatis jika kosong)</span>
+            </label>
+            <div class="group relative">
+              <span
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
+              >
+                <DocsIcon class="h-4 w-4" />
+              </span>
+              <input
+                id="nomor_sppd"
+                v-model="form.nomor_sppd"
+                type="text"
+                placeholder="Contoh: SPD-26090001"
+                :class="[inputClass, { 'border-error-500 focus:border-error-500 focus:ring-error-500/10': form.errors.nomor_sppd }]"
+              />
+            </div>
+            <p v-if="form.errors.nomor_sppd" class="mt-1.5 text-sm text-red-600 dark:text-red-400">
+              {{ form.errors.nomor_sppd }}
+            </p>
           </div>
 
           <div>
@@ -232,7 +255,7 @@
           <div>
             <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Perhitungan Biaya</h3>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Atur parameter perjalanan dinas lalu hitung estimasi biaya.
+              Atur parameter perjalanan dinas lalu hitung estimasi biaya. Baris Uang Saku dan Tiket Pesawat muncul di tabel rincian, nominal (Rp) dan jumlah hari dapat diubah langsung.
             </p>
           </div>
           <button
@@ -276,6 +299,10 @@
             <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
               <input v-model="taksiBandara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
               Taksi Bandara (PP)
+            </label>
+            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+              <input v-model="uangSakuAktif" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
+              Uang Saku
             </label>
           </div>
 
@@ -325,6 +352,18 @@
           {{ calcError }}
         </p>
 
+        <p v-if="uploadError" class="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">
+          {{ uploadError }}
+        </p>
+
+        <input
+          ref="buktiInput"
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          class="hidden"
+          @change="onBuktiSelected"
+        />
+
         <div class="mt-6 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
           <template v-if="result">
             <div class="overflow-x-auto">
@@ -336,6 +375,10 @@
                     <th class="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Satuan</th>
                     <th class="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Jumlah</th>
                     <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Keterangan</th>
+                    <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bukti</th>
+                    <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      <span class="sr-only">Aksi</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -345,10 +388,70 @@
                     class="border-b border-gray-100 last:border-0 dark:border-gray-800"
                   >
                     <td class="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{{ item.uraian }}</td>
-                    <td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300">{{ item.hari }}</td>
-                    <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatRupiah(item.satuan) }}</td>
+                    <td class="px-4 py-3 text-center">
+                      <input
+                        v-model.number="item.hari"
+                        type="number"
+                        min="0"
+                        class="w-20 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-center text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100"
+                        @input="onRincianChange(item)"
+                      />
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <div class="ml-auto w-36">
+                        <MoneyInput
+                          :model-value="item.satuan"
+                          @update:model-value="onSatuanChange(item, $event)"
+                        />
+                      </div>
+                    </td>
                     <td class="px-4 py-3 text-right text-sm font-medium text-gray-800 dark:text-white/90">{{ formatRupiah(item.jumlah) }}</td>
                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ item.keterangan }}</td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center justify-center gap-2">
+                        <template v-if="item.bukti_url">
+                          <a
+                            :href="item.bukti_url"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+                            title="Lihat bukti"
+                          >
+                            <PaperclipIcon class="h-4 w-4" />
+                            Lihat
+                          </a>
+                          <button
+                            type="button"
+                            class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
+                            title="Hapus bukti"
+                            @click="removeBukti(index)"
+                          >
+                            <TrashIcon class="h-4 w-4" />
+                          </button>
+                        </template>
+                        <button
+                          v-else
+                          type="button"
+                          :disabled="uploadingIndex === index"
+                          class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+                          title="Unggah bukti"
+                          @click="triggerUpload(index)"
+                        >
+                          <PaperclipIcon class="h-3.5 w-3.5" />
+                          {{ uploadingIndex === index ? 'Mengunggah...' : 'Upload' }}
+                        </button>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
+                        title="Hapus rincian"
+                        @click="removeRincian(index)"
+                      >
+                        <TrashIcon class="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -384,7 +487,7 @@
           :disabled="saving"
           class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-brand-300"
         >
-          {{ saving ? 'Menyimpan...' : 'Simpan SPPD' }}
+          {{ saving ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Simpan SPPD' }}
         </button>
       </div>
     </form>
@@ -392,7 +495,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { isAxiosError } from 'axios'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
@@ -400,12 +503,14 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import DatePicker from '@/components/ui/DatePicker.vue'
 import PegawaiSelect, { type PegawaiSelectOption } from '@/components/ui/PegawaiSelect.vue'
-import { calculateSppd, createSppd } from '@/api/sppd'
-import type { CalculatePayload, CalculateResult, CalculateRincian, Golongan } from '@/types/sppd'
+import MoneyInput from '@/components/ui/MoneyInput.vue'
+import { calculateSppd, createSppd, updateSppd, storeRincian, uploadBukti } from '@/api/sppd'
+import type { CalculatePayload, CalculateResult, CalculateRincian, Golongan, SppdRincian } from '@/types/sppd'
 import type { Pegawai, Provinsi } from '@/types/pegawai'
-import { UserCircleIcon, GridIcon, BarChartIcon, UserGroupIcon, FlagIcon, DocsIcon, SendIcon, BoxCubeIcon } from '@/icons'
+import { UserCircleIcon, GridIcon, BarChartIcon, UserGroupIcon, FlagIcon, DocsIcon, SendIcon, BoxCubeIcon, TrashIcon, PaperclipIcon } from '@/icons'
 
 interface SppdForm {
+  nomor_sppd: string
   atas_nama: string
   nip: string
   pangkat_golongan: string
@@ -417,10 +522,41 @@ interface SppdForm {
   keperluan: string
 }
 
+interface SppdProp {
+  id: number
+  nomor_sppd: string
+  atas_nama: string
+  nip: string | null
+  pangkat_golongan: string | null
+  jabatan: string | null
+  tanggal_mulai: string
+  tanggal_selesai: string
+  tujuan_daerah: string
+  provinsi_tujuan: number
+  keperluan: string | null
+  status: string
+  lama_hari: number
+  total_biaya: number
+  rincian?: SppdRincian[]
+  transport_udara?: boolean
+  transport_darat_pp?: boolean
+  taksi_bandara?: boolean
+  golongan?: Golongan | null
+  kota_asal_pesawat?: string | null
+  kota_tujuan_pesawat?: string | null
+}
+
 const props = defineProps<{
   provinsi: Provinsi[]
   pegawais: PegawaiSelectOption[]
+  sppd?: SppdProp | null
 }>()
+
+const isEdit = Boolean(props.sppd)
+const pageTitle = isEdit ? 'Edit SPPD' : 'Buat SPPD'
+const deskripsiData = isEdit
+  ? `Ubah data pelaksana perjalanan dinas (${props.sppd?.nomor_sppd}).`
+  : 'Lengkapi data pelaksana perjalanan dinas.'
 
 interface PagePropsShape {
   flash?: {
@@ -435,30 +571,70 @@ const inputClass =
   'w-full rounded-lg border border-gray-300 bg-white px-4 pl-10 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400'
 
 const form = useForm<SppdForm>({
-  atas_nama: '',
-  nip: '',
-  pangkat_golongan: '',
-  jabatan: '',
-  tanggal_mulai: '',
-  tanggal_selesai: '',
-  tujuan_daerah: '',
-  provinsi_tujuan: '',
-  keperluan: '',
+  nomor_sppd: props.sppd?.nomor_sppd ?? '',
+  atas_nama: props.sppd?.atas_nama ?? '',
+  nip: props.sppd?.nip ?? '',
+  pangkat_golongan: props.sppd?.pangkat_golongan ?? '',
+  jabatan: props.sppd?.jabatan ?? '',
+  tanggal_mulai: props.sppd?.tanggal_mulai.slice(0, 10) ?? '',
+  tanggal_selesai: props.sppd?.tanggal_selesai.slice(0, 10) ?? '',
+  tujuan_daerah: props.sppd?.tujuan_daerah ?? '',
+  provinsi_tujuan: props.sppd?.provinsi_tujuan ?? '',
+  keperluan: props.sppd?.keperluan ?? '',
 })
 
-const selectedPegawaiId = ref<number | ''>('')
-const golongan = ref<Golongan>('eselon_1')
-const transportUdara = ref(false)
-const transportDarat = ref(false)
-const taksiBandara = ref(false)
-const kotaAsal = ref('')
-const kotaTujuan = ref('')
+const lamaHari = computed<number>(() => {
+  if (!form.tanggal_mulai || !form.tanggal_selesai) return 0
+  const start = new Date(form.tanggal_mulai).getTime()
+  const end = new Date(form.tanggal_selesai).getTime()
+  if (Number.isNaN(start) || Number.isNaN(end) || end < start) return 0
+  return Math.floor((end - start) / 86400000) + 1
+})
+
+const selectedPegawaiId = ref<number | ''>(
+  props.sppd?.nip
+    ? (props.pegawais.find((p) => p.nip === props.sppd?.nip)?.id ?? '')
+    : '',
+)
+const golongan = ref<Golongan>(props.sppd?.golongan ?? 'eselon_1')
+const transportUdara = ref(Boolean(props.sppd?.transport_udara))
+const transportDarat = ref(Boolean(props.sppd?.transport_darat_pp))
+const taksiBandara = ref(Boolean(props.sppd?.taksi_bandara))
+const kotaAsal = ref(props.sppd?.kota_asal_pesawat ?? '')
+const kotaTujuan = ref(props.sppd?.kota_tujuan_pesawat ?? '')
+const savedUangSaku = props.sppd?.rincian?.find((item) => item.jenis_biaya === 'uang_saku')
+const uangSaku = ref<number>(savedUangSaku?.satuan ?? 0)
+const uangSakuHari = ref<number>(savedUangSaku?.hari ?? 0)
+const uangSakuAktif = ref<boolean>(Boolean(savedUangSaku))
 
 const result = ref<CalculateResult | null>(null)
 const rincian = ref<CalculateRincian[]>([])
 const calculating = ref(false)
 const saving = ref(false)
 const calcError = ref('')
+const buktiInput = ref<HTMLInputElement | null>(null)
+const uploadTargetIndex = ref<number | null>(null)
+const uploadingIndex = ref<number | null>(null)
+const uploadError = ref('')
+
+const rincianTersimpan = props.sppd?.rincian
+if (rincianTersimpan && rincianTersimpan.length > 0 && props.sppd) {
+  result.value = {
+    rincian: rincianTersimpan.map((item) => ({
+      jenis_biaya: item.jenis_biaya,
+      uraian: item.uraian,
+      hari: item.hari,
+      satuan: item.satuan,
+      jumlah: item.jumlah,
+      keterangan: item.keterangan ?? '',
+      bukti: item.bukti ?? null,
+      bukti_url: item.bukti_url ?? null,
+    })),
+    total_biaya: props.sppd.total_biaya ?? 0,
+    lama_hari: props.sppd.lama_hari ?? 0,
+    terbilang: terbilang(props.sppd.total_biaya ?? 0),
+  }
+}
 
 const golonganOptions: { value: Golongan; label: string }[] = [
   { value: 'eselon_1', label: 'Eselon I' },
@@ -473,6 +649,109 @@ const formatRupiah = (value: number): string =>
     currency: 'IDR',
     maximumFractionDigits: 0,
   }).format(value || 0)
+
+function terbilang(angka: number): string {
+  const huruf = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas']
+  const n = Math.floor(Math.abs(Number(angka) || 0))
+  if (n < 12) return huruf[n]
+  if (n < 20) return `${huruf[n - 10]} belas`
+  if (n < 100) {
+    const x = Math.floor(n / 10)
+    const sisa = n % 10
+    return `${x === 1 ? 'se' : `${huruf[x]} `}puluh${sisa > 0 ? ` ${huruf[sisa]}` : ''}`
+  }
+  if (n < 200) return `seratus ${terbilang(n - 100)}`
+  if (n < 1000) {
+    const x = Math.floor(n / 100)
+    const sisa = n % 100
+    return `${huruf[x]} ratus${sisa > 0 ? ` ${terbilang(sisa)}` : ''}`
+  }
+  if (n < 2000) return `seribu ${terbilang(n - 1000)}`
+  if (n < 1000000) {
+    const x = Math.floor(n / 1000)
+    const sisa = n % 1000
+    return `${terbilang(x)} ribu${sisa > 0 ? ` ${terbilang(sisa)}` : ''}`
+  }
+  if (n < 1000000000) {
+    const x = Math.floor(n / 1000000)
+    const sisa = n % 1000000
+    return `${terbilang(x)} juta${sisa > 0 ? ` ${terbilang(sisa)}` : ''}`
+  }
+  return String(n)
+}
+
+const recalcTotal = (): void => {
+  if (!result.value) return
+  result.value.total_biaya = result.value.rincian.reduce(
+    (sum, item) => sum + (Number(item.jumlah) || 0),
+    0,
+  )
+  result.value.terbilang = terbilang(result.value.total_biaya)
+}
+
+const onRincianChange = (item: CalculateRincian): void => {
+  item.hari = Math.max(0, Number(item.hari) || 0)
+  item.satuan = Math.max(0, Number(item.satuan) || 0)
+  item.jumlah = item.hari * item.satuan
+  if (item.jenis_biaya === 'uang_saku') {
+    uangSaku.value = item.satuan
+    uangSakuHari.value = item.hari
+  }
+  recalcTotal()
+}
+
+const removeRincian = (index: number): void => {
+  if (!result.value) return
+  const [removed] = result.value.rincian.splice(index, 1)
+  if (removed?.jenis_biaya === 'uang_saku') {
+    uangSakuAktif.value = false
+    uangSaku.value = 0
+    uangSakuHari.value = 0
+  }
+  recalcTotal()
+}
+
+const onSatuanChange = (item: CalculateRincian, value: number): void => {
+  item.satuan = Number(value) || 0
+  onRincianChange(item)
+}
+
+const triggerUpload = (index: number): void => {
+  uploadTargetIndex.value = index
+  uploadError.value = ''
+  buktiInput.value?.click()
+}
+
+const onBuktiSelected = async (event: Event): Promise<void> => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  const index = uploadTargetIndex.value
+  if (!file || index === null || !result.value) return
+  uploadingIndex.value = index
+  uploadError.value = ''
+  try {
+    const res = await uploadBukti(file)
+    const item = result.value.rincian[index]
+    if (item) {
+      item.bukti = res.path
+      item.bukti_url = res.url
+    }
+  } catch {
+    uploadError.value = 'Gagal mengunggah bukti. Gunakan format PDF/JPG/PNG/WEBP maksimal 5 MB.'
+  } finally {
+    uploadingIndex.value = null
+    uploadTargetIndex.value = null
+  }
+}
+
+const removeBukti = (index: number): void => {
+  const item = result.value?.rincian[index]
+  if (!item) return
+  item.bukti = null
+  item.bukti_url = null
+  uploadError.value = ''
+}
 
 const onPegawaiChange = (): void => {
   const pegawai = props.pegawais.find((p) => p.id === selectedPegawaiId.value)
@@ -506,6 +785,8 @@ const buildCalculatePayload = (): CalculatePayload => ({
   taksi_bandara: taksiBandara.value,
   kota_asal_pesawat: transportUdara.value ? kotaAsal.value || null : null,
   kota_tujuan_pesawat: transportUdara.value ? kotaTujuan.value || null : null,
+  uang_saku: uangSakuAktif.value ? Number(uangSaku.value) || 0 : 0,
+  uang_saku_hari: uangSakuAktif.value ? Number(uangSakuHari.value) || lamaHari.value || 0 : 0,
 })
 
 const handleCalculate = async (): Promise<void> => {
@@ -534,10 +815,16 @@ const handleCalculate = async (): Promise<void> => {
   }
 }
 
+const saveRincian = async (id: number): Promise<void> => {
+  if (!result.value?.rincian?.length) return
+  await storeRincian(id, result.value.rincian)
+}
+
 const handleSimpan = async (): Promise<void> => {
   saving.value = true
   try {
-    await createSppd({
+    const payload = {
+      nomor_sppd: form.nomor_sppd || null,
       atas_nama: form.atas_nama,
       nip: form.nip || null,
       pangkat_golongan: form.pangkat_golongan || null,
@@ -547,7 +834,25 @@ const handleSimpan = async (): Promise<void> => {
       tujuan_daerah: form.tujuan_daerah,
       provinsi_tujuan: Number(form.provinsi_tujuan),
       keperluan: form.keperluan || null,
-    })
+      transport_udara: transportUdara.value,
+      transport_darat_pp: transportDarat.value,
+      taksi_bandara: taksiBandara.value,
+      golongan: golongan.value,
+      kota_asal_pesawat: transportUdara.value ? kotaAsal.value || null : null,
+      kota_tujuan_pesawat: transportUdara.value ? kotaTujuan.value || null : null,
+    }
+
+    if (isEdit && props.sppd) {
+      await updateSppd(props.sppd.id, {
+        ...payload,
+        status: props.sppd.status === 'batal' ? 'draft' : undefined,
+      })
+      await saveRincian(props.sppd.id)
+    } else {
+      const res = await createSppd(payload)
+      await saveRincian(res.sppd.id)
+    }
+
     form.clearErrors()
     router.visit('/sppd')
   } catch (error) {

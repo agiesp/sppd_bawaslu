@@ -18,8 +18,8 @@
             <input
               v-model="search"
               type="text"
-              placeholder="Cari nomor SPPD, atas nama, tujuan..."
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400"
+              placeholder="Cari nomor SPPD, atas nama, keperluan..."
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400"
             />
             <svg
               class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
@@ -44,7 +44,7 @@
             </span>
             <select
               v-model="statusFilter"
-              class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:focus:border-blue-400"
+              class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100 dark:focus:border-blue-400"
             >
               <option value="">Semua Status</option>
               <option value="draft">Draft</option>
@@ -57,7 +57,7 @@
         <Link
           v-if="canCreate(menuUrl)"
           href="/sppd/buat"
-          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@
               <th
                 class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
               >
-                Tujuan
+                Keperluan
               </th>
               <th
                 class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
@@ -130,11 +130,28 @@
               <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                 {{ item.nomor_sppd }}
               </td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                {{ item.atas_nama }}
+              <td class="whitespace-nowrap px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <img
+                    v-if="item.pegawai?.avatar_url"
+                    :src="item.pegawai.avatar_url"
+                    :alt="item.atas_nama"
+                    class="h-8 w-8 shrink-0 rounded-full object-cover"
+                  />
+                  <span
+                    v-else
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    {{ item.atas_nama.charAt(0).toUpperCase() }}
+                  </span>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.atas_nama }}</p>
+                    <p v-if="item.nip" class="text-xs text-gray-500 dark:text-gray-400">NIP. {{ item.nip }}</p>
+                  </div>
+                </div>
               </td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                {{ item.tujuan_daerah }}<span v-if="item.provinsi">, {{ item.provinsi }}</span>
+              <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ item.keperluan || '-' }}
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                 {{ formatTanggal(item.tanggal_mulai) }} - {{ formatTanggal(item.tanggal_selesai) }}
@@ -288,8 +305,11 @@ interface SppdItem {
   id: number | string
   nomor_sppd: string
   atas_nama: string
+  nip: string | null
+  keperluan: string | null
   tujuan_daerah: string
   provinsi: string
+  pegawai?: { avatar_url: string | null } | null
   tanggal_mulai: string
   tanggal_selesai: string
   lama_hari: number
@@ -365,7 +385,7 @@ const filteredData = computed(() => {
       (item) =>
         item.nomor_sppd.toLowerCase().includes(q) ||
         item.atas_nama.toLowerCase().includes(q) ||
-        item.tujuan_daerah.toLowerCase().includes(q),
+        (item.keperluan ?? '').toLowerCase().includes(q),
     )
   }
 
