@@ -27,3 +27,12 @@ jobs:
 
       - name: Run build script
         run: npm run build
+
+
+        
+    # Tambahkan di baris paling bawah jobs build Anda
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-build-files
+          path: build # Ganti dengan 'build' atau nama folder output proyek Anda
