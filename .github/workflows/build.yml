@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: my-build-files
-          path: build # Ganti dengan 'build' atau nama folder output proyek Anda
+          path: public/build # Ganti dengan 'build' atau nama folder output proyek Anda
