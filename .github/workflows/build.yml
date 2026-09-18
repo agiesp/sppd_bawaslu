@@ -1,0 +1,32 @@
+name: Node.js Build Test
+
+# Memicu workflow saat ada push atau PR ke branch main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout kode dari repository GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup lingkungan Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # Sesuaikan versi Node.js proyek Anda (18/20/22)
+          cache: 'npm'
+
+      # 3. Install dependensi secara bersih
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Jalankan perintah npm run build
+      - name: Run build script
+        run: npm run build
