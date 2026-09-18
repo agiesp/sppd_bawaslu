@@ -11,28 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Gunakan versi v5 untuk actions/checkout
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # 2. Gunakan versi v5 untuk actions/setup-node dan perbarui versi Node ke 22 atau 24
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22 # Atau gunakan 24 sesuai kebutuhan proyek
+          node-version: 22
           cache: 'npm'
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # 4. Run build script
       - name: Run build script
         run: npm run build
 
-
-        
-    # Tambahkan di baris paling bawah jobs build Anda
+      # 5. Upload build artifact
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: my-build-files
-          path: public/build # Ganti dengan 'build' atau nama folder output proyek Anda
+          path: public/build # Ganti ke 'dist' jika ini proyek Vue/React murni
