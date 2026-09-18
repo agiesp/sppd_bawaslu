@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: my-build-files
-          path: build # Ganti ke 'dist' jika ini proyek Vue/React murni
+          path: public/build # Ganti ke 'dist' jika ini proyek Vue/React murni
