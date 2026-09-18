@@ -32,7 +32,7 @@ jobs:
         
     # Tambahkan di baris paling bawah jobs build Anda
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: my-build-files
           path: build # Ganti dengan 'build' atau nama folder output proyek Anda
