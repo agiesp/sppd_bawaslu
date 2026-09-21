@@ -75,6 +75,50 @@
         class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
         <div class="flex items-center gap-2 2xsm:gap-3">
+          <div
+            v-if="tahunList.length"
+            class="relative flex h-11 min-w-[160px] items-center gap-2.5 rounded-xl border border-gray-200 bg-white pl-3 pr-10 shadow-theme-xs transition-all hover:border-brand-300 hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-brand-500/40"
+          >
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+              <Calendar2Line class="h-4 w-4" />
+            </span>
+            <span class="flex flex-col leading-none">
+              
+              <span class="mt-0.5 text-sm font-bold text-gray-800 dark:text-white/90">Tahun {{ selectedTahun }}</span>
+            </span>
+            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+            <div v-if="tahunOpen" class="fixed inset-0 z-40" @click="tahunOpen = false"></div>
+            <button
+              type="button"
+              aria-label="Pilih Tahun"
+              class="absolute inset-0 z-30 h-full w-full cursor-pointer appearance-none rounded-xl bg-transparent"
+              @click="tahunOpen = !tahunOpen"
+            ></button>
+            <div
+              v-if="tahunOpen"
+              class="absolute right-0 top-[calc(100%+8px)] z-50 w-full min-w-[160px] overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
+            >
+              <button
+                v-for="t in tahunList"
+                :key="t"
+                type="button"
+                class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-sm font-medium transition-colors"
+                :class="
+                  t === selectedTahun
+                    ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200'
+                "
+                @click="setTahun(t); tahunOpen = false"
+              >
+                <span>Tahun {{ t }}</span>
+                <CheckIcon v-if="t === selectedTahun" class="h-4 w-4 shrink-0" />
+              </button>
+            </div>
+          </div>
           <ThemeToggler />
           <NotificationMenu />
         </div>
@@ -87,11 +131,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useSidebar } from '../../composables/useSidebar'
+import { useTahun } from '@/composables/useTahun'
+import { Calendar2Line, CheckIcon } from '@/icons'
 import ThemeToggler from './ThemeToggler.vue'
 import SearchBar from './header/SearchBar.vue'
 import HeaderLogo from './header/HeaderLogo.vue'
 import NotificationMenu from './header/NotificationMenu.vue'
 import UserMenu from './header/UserMenu.vue'
+
+const { selectedTahun, setTahun, tahunList } = useTahun()
+
+const tahunOpen = ref(false)
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
 

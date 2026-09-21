@@ -10,7 +10,7 @@ class SppdRincian extends Model
 {
     protected $table = 'tb_sppd_rincian';
     public $timestamps = false;
-    protected $fillable = ['id_sppd', 'jenis_biaya', 'uraian', 'hari', 'satuan', 'jumlah', 'keterangan', 'bukti'];
+    protected $fillable = ['id_sppd', 'tahun', 'jenis_biaya', 'uraian', 'hari', 'satuan', 'jumlah', 'keterangan', 'bukti'];
 
     protected $appends = ['bukti_url'];
 
@@ -26,6 +26,7 @@ class SppdRincian extends Model
     protected function casts(): array
     {
         return [
+            'tahun' => 'integer',
             'hari' => 'integer',
             'satuan' => 'integer',
             'jumlah' => 'integer',

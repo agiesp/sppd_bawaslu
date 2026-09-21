@@ -268,7 +268,40 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+          Jenis SPPD<span class="text-error-500">*</span>
+        </label>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200" :class="jenisSppdCard('dalam')">
+            <input v-model="jenisSppd" type="radio" name="jenis_sppd" value="dalam" class="peer sr-only" />
+            <span
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200"
+              :class="jenisSppd === 'dalam' ? 'border-brand-500' : 'border-gray-300 group-hover:border-brand-400 dark:border-gray-600'"
+            >
+              <span class="h-2.5 w-2.5 rounded-full transition-all duration-200" :class="jenisSppd === 'dalam' ? 'scale-100 bg-brand-500' : 'scale-50 bg-transparent'"></span>
+            </span>
+            <span class="block">
+              <span class="block text-sm font-medium" :class="jenisSppd === 'dalam' ? 'text-brand-700 dark:text-brand-300' : 'text-gray-700 dark:text-gray-300'">SPPD Dalam Daerah</span>
+              <span class="block text-xs text-gray-400">Tanpa pesawat, taksi & uang saku</span>
+            </span>
+          </label>
+
+          <label class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200" :class="jenisSppdCard('luar')">
+            <input v-model="jenisSppd" type="radio" name="jenis_sppd" value="luar" class="peer sr-only" />
+            <span
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200"
+              :class="jenisSppd === 'luar' ? 'border-brand-500' : 'border-gray-300 group-hover:border-brand-400 dark:border-gray-600'"
+            >
+              <span class="h-2.5 w-2.5 rounded-full transition-all duration-200" :class="jenisSppd === 'luar' ? 'scale-100 bg-brand-500' : 'scale-50 bg-transparent'"></span>
+            </span>
+            <span class="block">
+              <span class="block text-sm font-medium" :class="jenisSppd === 'luar' ? 'text-brand-700 dark:text-brand-300' : 'text-gray-700 dark:text-gray-300'">SPPD Luar Daerah</span>
+              <span class="block text-xs text-gray-400">Boleh pakai pesawat, taksi & uang saku</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
           <div>
             <label for="golongan" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
               Golongan
@@ -287,65 +320,267 @@
             </div>
           </div>
 
-          <div class="flex flex-col justify-end gap-3">
-            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-              <input v-model="transportUdara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
-              Transportasi Udara (Pesawat)
+          <div class="lg:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Lama Perjalanan
+              <span class="text-xs font-normal text-gray-400 dark:text-gray-500">(otomatis dari tanggal)</span>
             </label>
-            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-              <input v-model="transportDarat" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
-              Transportasi Darat (PP)
+            <div class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-2.5 text-sm text-gray-600 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
+              <Calendar2Line class="h-4 w-4 text-gray-400" />
+              <span class="font-semibold text-gray-800 dark:text-white/90">{{ lamaHari }}</span>
+              <span>hari</span>
+              <span class="hidden text-gray-400 sm:inline">
+                ({{ form.tanggal_mulai || '--' }} s.d. {{ form.tanggal_selesai || '--' }})
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <div class="mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-semibold text-gray-800 dark:text-white/90">Transportasi</h4>
+            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">opsional</span>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="[
+                daerahDalam
+                  ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:opacity-40'
+                  : '',
+                transportUdara
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5',
+              ]"
+            >
+              <input v-model="transportUdara" type="checkbox" class="peer sr-only" :disabled="daerahDalam" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  transportUdara
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="transportUdara ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+                />
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  transportUdara
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Transportasi Udara (Pesawat)
+              </span>
             </label>
-            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-              <input v-model="taksiBandara" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
-              Taksi Bandara (PP)
+
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="
+                transportDarat
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5'
+              "
+            >
+              <input v-model="transportDarat" type="checkbox" class="peer sr-only" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  transportDarat
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="transportDarat ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+                />
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  transportDarat
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Kendaraan Umum (PP)
+              </span>
             </label>
-            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-              <input v-model="uangSakuAktif" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30 dark:border-gray-600 dark:bg-white/[0.05]" />
-              Uang Saku
+
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="
+                transportKendaraanDinas
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5'
+              "
+            >
+              <input v-model="transportKendaraanDinas" type="checkbox" class="peer sr-only" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  transportKendaraanDinas
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="transportKendaraanDinas ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+                />
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  transportKendaraanDinas
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Transportasi Kendaraan Dinas (PP)
+              </span>
+            </label>
+
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="[
+                daerahDalam
+                  ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:opacity-40'
+                  : '',
+                taksiBandara
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5',
+              ]"
+            >
+              <input v-model="taksiBandara" type="checkbox" class="peer sr-only" :disabled="daerahDalam" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  taksiBandara
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="taksiBandara ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+                />
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  taksiBandara
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Taksi Bandara (PP)
+              </span>
             </label>
           </div>
 
-          <template v-if="transportUdara">
-            <div>
-              <label for="kota_asal_pesawat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                Kota Asal Pesawat
-              </label>
-              <div class="group relative">
-                <span
-                  class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
-                >
-                  <SendIcon class="h-4 w-4" />
-                </span>
-                <input
-                  id="kota_asal_pesawat"
-                  v-model="kotaAsal"
-                  type="text"
-                  placeholder="Contoh: Banda Aceh"
-                  :class="inputClass"
-                />
+          <div v-if="transportUdara" class="mt-4 rounded-xl border border-brand-100 bg-brand-50/40 p-4 dark:border-brand-900/40 dark:bg-brand-500/5">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">Rute Pesawat</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label for="kota_asal_pesawat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Kota Asal Pesawat
+                </label>
+                <div class="group relative">
+                  <span
+                    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
+                  >
+                    <SendIcon class="h-4 w-4" />
+                  </span>
+                  <input
+                    id="kota_asal_pesawat"
+                    v-model="kotaAsal"
+                    type="text"
+                    placeholder="Contoh: Banda Aceh"
+                    :class="inputClass"
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="kota_tujuan_pesawat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Kota Tujuan Pesawat
+                </label>
+                <div class="group relative">
+                  <span
+                    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
+                  >
+                    <BoxCubeIcon class="h-4 w-4" />
+                  </span>
+                  <input
+                    id="kota_tujuan_pesawat"
+                    v-model="kotaTujuan"
+                    type="text"
+                    placeholder="Contoh: Jakarta"
+                    :class="inputClass"
+                  />
+                </div>
               </div>
             </div>
-            <div>
-              <label for="kota_tujuan_pesawat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                Kota Tujuan Pesawat
-              </label>
-              <div class="group relative">
-                <span
-                  class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
-                >
-                  <BoxCubeIcon class="h-4 w-4" />
-                </span>
-                <input
-                  id="kota_tujuan_pesawat"
-                  v-model="kotaTujuan"
-                  type="text"
-                  placeholder="Contoh: Jakarta"
-                  :class="inputClass"
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <div class="mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-semibold text-gray-800 dark:text-white/90">Uang Saku</h4>
+            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">opsional</span>
+          </div>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="[
+                daerahDalam
+                  ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:opacity-40'
+                  : '',
+                uangSakuAktif
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5',
+              ]"
+            >
+              <input v-model="uangSakuAktif" type="checkbox" class="peer sr-only" :disabled="daerahDalam" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  uangSakuAktif
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="uangSakuAktif ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
                 />
-              </div>
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  uangSakuAktif
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Uang Saku
+              </span>
+            </label>
+
+            <div class="flex items-center gap-2.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 px-4 py-4 dark:border-gray-700 dark:bg-white/[0.03]">
+              <InfoIcon class="h-4 w-4 shrink-0 text-gray-400" />
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Nominal uang saku dan jumlah hari dapat diubah di tabel rincian setelah biaya dihitung.
+              </p>
             </div>
-          </template>
+          </div>
         </div>
 
         <p v-if="calcError" class="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">
@@ -387,7 +622,13 @@
                     :key="index"
                     class="border-b border-gray-100 last:border-0 dark:border-gray-800"
                   >
-                    <td class="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{{ item.uraian }}</td>
+                    <td class="px-4 py-3">
+                      <input
+                        v-model="item.uraian"
+                        type="text"
+                        class="w-full min-w-[10rem] rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-white/[0.05] dark:text-gray-100"
+                      />
+                    </td>
                     <td class="px-4 py-3 text-center">
                       <input
                         v-model.number="item.hari"
@@ -495,7 +736,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { isAxiosError } from 'axios'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
@@ -507,7 +748,7 @@ import MoneyInput from '@/components/ui/MoneyInput.vue'
 import { calculateSppd, createSppd, updateSppd, storeRincian, uploadBukti } from '@/api/sppd'
 import type { CalculatePayload, CalculateResult, CalculateRincian, Golongan, SppdRincian } from '@/types/sppd'
 import type { Pegawai, Provinsi } from '@/types/pegawai'
-import { UserCircleIcon, GridIcon, BarChartIcon, UserGroupIcon, FlagIcon, DocsIcon, SendIcon, BoxCubeIcon, TrashIcon, PaperclipIcon } from '@/icons'
+import { UserCircleIcon, GridIcon, BarChartIcon, UserGroupIcon, FlagIcon, DocsIcon, SendIcon, BoxCubeIcon, TrashIcon, PaperclipIcon, CheckIcon, Calendar2Line, InfoIcon } from '@/icons'
 
 interface SppdForm {
   nomor_sppd: string
@@ -541,6 +782,7 @@ interface SppdProp {
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean
+  transport_kendaraan_dinas_pp?: boolean
   golongan?: Golongan | null
   kota_asal_pesawat?: string | null
   kota_tujuan_pesawat?: string | null
@@ -599,6 +841,7 @@ const selectedPegawaiId = ref<number | ''>(
 const golongan = ref<Golongan>(props.sppd?.golongan ?? 'eselon_1')
 const transportUdara = ref(Boolean(props.sppd?.transport_udara))
 const transportDarat = ref(Boolean(props.sppd?.transport_darat_pp))
+const transportKendaraanDinas = ref(Boolean(props.sppd?.transport_kendaraan_dinas_pp))
 const taksiBandara = ref(Boolean(props.sppd?.taksi_bandara))
 const kotaAsal = ref(props.sppd?.kota_asal_pesawat ?? '')
 const kotaTujuan = ref(props.sppd?.kota_tujuan_pesawat ?? '')
@@ -606,6 +849,21 @@ const savedUangSaku = props.sppd?.rincian?.find((item) => item.jenis_biaya === '
 const uangSaku = ref<number>(savedUangSaku?.satuan ?? 0)
 const uangSakuHari = ref<number>(savedUangSaku?.hari ?? 0)
 const uangSakuAktif = ref<boolean>(Boolean(savedUangSaku))
+
+const jenisSppd = ref<'dalam' | 'luar'>('luar')
+const daerahDalam = computed(() => jenisSppd.value === 'dalam')
+const jenisSppdCard = (opt: 'dalam' | 'luar'): string =>
+  jenisSppd.value === opt
+    ? 'border-brand-500 bg-brand-50/80 ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+    : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5'
+
+watch(jenisSppd, (value) => {
+  if (value === 'dalam') {
+    transportUdara.value = false
+    taksiBandara.value = false
+    uangSakuAktif.value = false
+  }
+})
 
 const result = ref<CalculateResult | null>(null)
 const rincian = ref<CalculateRincian[]>([])
@@ -708,6 +966,15 @@ const removeRincian = (index: number): void => {
     uangSaku.value = 0
     uangSakuHari.value = 0
   }
+  if (removed?.jenis_biaya === 'transport_dinas_pp') {
+    transportKendaraanDinas.value = false
+  }
+  if (
+    removed?.jenis_biaya === 'transport_darat' &&
+    !result.value.rincian.some((i) => i.jenis_biaya === 'transport_darat')
+  ) {
+    transportDarat.value = false
+  }
   recalcTotal()
 }
 
@@ -782,6 +1049,7 @@ const buildCalculatePayload = (): CalculatePayload => ({
   golongan: golongan.value,
   transport_udara: transportUdara.value,
   transport_darat_pp: transportDarat.value,
+  transport_kendaraan_dinas_pp: transportKendaraanDinas.value,
   taksi_bandara: taksiBandara.value,
   kota_asal_pesawat: transportUdara.value ? kotaAsal.value || null : null,
   kota_tujuan_pesawat: transportUdara.value ? kotaTujuan.value || null : null,
@@ -836,6 +1104,7 @@ const handleSimpan = async (): Promise<void> => {
       keperluan: form.keperluan || null,
       transport_udara: transportUdara.value,
       transport_darat_pp: transportDarat.value,
+      transport_kendaraan_dinas_pp: transportKendaraanDinas.value,
       taksi_bandara: taksiBandara.value,
       golongan: golongan.value,
       kota_asal_pesawat: transportUdara.value ? kotaAsal.value || null : null,

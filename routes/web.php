@@ -26,6 +26,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 
 // SPPD
 Route::get('/sppd', [SppdController::class, 'index'])->middleware('auth', 'permission:/sppd:view');
+Route::get('/sppd/laporan', [SppdController::class, 'laporan'])->middleware('auth', 'permission:/sppd/laporan:view');
+Route::get('/sppd/laporan/preview', [SppdController::class, 'laporanPreview'])->middleware('auth', 'permission:/sppd/laporan:view');
+Route::get('/sppd/laporan/export/pdf', [SppdController::class, 'laporanExportPdf'])->middleware('auth', 'permission:/sppd/laporan:view');
+Route::get('/sppd/laporan/export/excel', [SppdController::class, 'laporanExportExcel'])->middleware('auth', 'permission:/sppd/laporan:view');
 Route::get('/sppd/buat', [SppdController::class, 'create'])->middleware('auth', 'permission:/sppd:create');
 Route::post('/sppd', [SppdController::class, 'store'])->middleware('auth', 'permission:/sppd:create');
 Route::get('/sppd/{sppd}/edit', [SppdController::class, 'edit'])->middleware('auth', 'permission:/sppd:edit');

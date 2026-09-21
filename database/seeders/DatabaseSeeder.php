@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RefTarifTransportDaratSeeder::class,
             RefTarifTransportProvinsiSeeder::class,
             RefPegawaiSeeder::class,
+            SppdSeeder::class,
         ]);
     }
 }

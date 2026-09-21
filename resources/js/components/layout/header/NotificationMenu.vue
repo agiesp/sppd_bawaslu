@@ -32,12 +32,17 @@
     <!-- Dropdown Start -->
     <div
       v-if="dropdownOpen"
-      class="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
+      class="absolute -right-[240px] mt-[17px] flex max-h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
     >
       <div
         class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-800"
       >
-        <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notification</h5>
+        <div>
+          <h5 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notification</h5>
+          <p class="text-theme-xs text-gray-400 dark:text-gray-500">
+            SPPD yang sedang berlangsung
+          </p>
+        </div>
 
         <button @click="closeDropdown" class="text-gray-500 dark:text-gray-400">
           <svg
@@ -58,47 +63,73 @@
         </button>
       </div>
 
-      <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-        <li v-for="notification in notifications" :key="notification.id" @click="handleItemClick">
+      <ul class="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
+        <li v-for="notif in notifications" :key="notif.id" @click="handleItemClick(notif)">
           <a
             class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             href="#"
           >
-            <span class="relative block w-full h-10 rounded-full z-1 max-w-10">
-              <img :src="notification.userImage" alt="User" class="overflow-hidden rounded-full" />
+            <span class="relative block w-10 h-10 shrink-0 overflow-hidden rounded-full">
+              <img v-if="notif.avatar_url" :src="notif.avatar_url" alt="User" class="h-full w-full object-cover" />
               <span
-                :class="notification.status === 'online' ? 'bg-success-500' : 'bg-error-500'"
-                class="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white dark:border-gray-900"
+                v-else
+                class="flex h-full w-full items-center justify-center bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300"
+              >
+                {{ initials(notif.atas_nama) }}
+              </span>
+              <span
+                class="absolute bottom-0 right-0 z-10 h-2.5 w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"
               ></span>
             </span>
 
-            <span class="block">
-              <span class="mb-1.5 block text-theme-sm text-gray-500 dark:text-gray-400">
+            <span class="block min-w-0 flex-1">
+              <span class="mb-1 block text-theme-sm text-gray-500 dark:text-gray-400">
                 <span class="font-medium text-gray-800 dark:text-white/90">
-                  {{ notification.userName }}
+                  {{ notif.atas_nama }}
                 </span>
-                {{ notification.action }}
-                <span class="font-medium text-gray-800 dark:text-white/90">
-                  {{ notification.project }}
-                </span>
+                {{ notif.keperluan || 'Melakukan Perjalanan Dinas' }}
               </span>
 
-              <span class="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                <span>{{ notification.type }}</span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <span>{{ notification.time }}</span>
+              <span class="flex items-center gap-1.5 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span class="truncate">{{ notif.tujuan_daerah }}</span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full shrink-0"></span>
+                <span class="shrink-0">{{ formatTanggal(notif.tanggal_mulai) }} - {{ formatTanggal(notif.tanggal_selesai) }}</span>
+              </span>
+
+              <span
+                class="mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold"
+                :class="statusBadgeClass(notif.status)"
+              >
+                {{ statusLabel(notif.status) }}
               </span>
             </span>
           </a>
         </li>
+
+        <li v-if="loading" class="flex flex-col gap-3 p-3">
+          <div v-for="i in 3" :key="'skel-' + i" class="flex items-center gap-3">
+            <div class="h-10 w-10 shrink-0 rounded-full bg-slate-100 animate-pulse dark:bg-white/5"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3 w-3/4 rounded bg-slate-100 animate-pulse dark:bg-white/5"></div>
+              <div class="h-2.5 w-1/2 rounded bg-slate-100 animate-pulse dark:bg-white/5"></div>
+            </div>
+          </div>
+        </li>
+
+        <li v-if="!loading && notifications.length === 0" class="py-10 text-center">
+          <p class="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">Tidak ada notifikasi</p>
+          <p class="text-theme-xs text-gray-400 dark:text-gray-500">
+            Tidak ada SPPD yang sedang berlangsung hari ini.
+          </p>
+        </li>
       </ul>
 
       <Link
-        href="#"
+        href="/sppd"
         class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-        @click="handleViewAllClick"
+        @click="closeDropdown"
       >
-        View All Notification
+        Lihat Semua SPPD
       </Link>
     </div>
     <!-- Dropdown End -->
@@ -106,96 +137,51 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
+import { fetchDashboardNotifications } from '@/api/dashboard'
 
 const dropdownOpen = ref(false)
-const notifying = ref(true)
+const notifying = ref(false)
+const loading = ref(true)
+const notifications = ref([])
 const dropdownRef = ref(null)
 
-const notifications = ref([
-  {
-    id: 1,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-02.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 2,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-03.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'offline',
-  },
-  {
-    id: 3,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-04.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 4,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-05.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 5,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-06.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'offline',
-  },
-  {
-    id: 6,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-07.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 7,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-08.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  {
-    id: 7,
-    userName: 'Terry Franci',
-    userImage: '/images/user/user-09.jpg',
-    action: 'requests permission to change',
-    project: 'Project - Nganter App',
-    type: 'Project',
-    time: '5 min ago',
-    status: 'online',
-  },
-  // Add more notifications here...
-])
+const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+
+const statusStyles = {
+  draft: { badge: 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300', label: 'Draft' },
+  proses: { badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300', label: 'Berlangsung' },
+  selesai: { badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300', label: 'Selesai' },
+  batal: { badge: 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-300', label: 'Batal' },
+}
+
+const statusBadgeClass = (status) => statusStyles[status]?.badge ?? statusStyles.proses.badge
+const statusLabel = (status) => statusStyles[status]?.label ?? status
+
+const initials = (name) =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('')
+
+const formatTanggal = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} ${monthNames[m - 1]} ${y}`
+}
+
+const loadNotifications = async () => {
+  loading.value = true
+  try {
+    const res = await fetchDashboardNotifications()
+    notifications.value = res.notifications ?? []
+    notifying.value = notifications.value.length > 0
+  } finally {
+    loading.value = false
+  }
+}
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value
@@ -212,21 +198,12 @@ const handleClickOutside = (event) => {
   }
 }
 
-const handleItemClick = (event) => {
-  event.preventDefault()
-  // Handle the item click action here
-  console.log('Notification item clicked')
-  closeDropdown()
-}
-
-const handleViewAllClick = (event) => {
-  event.preventDefault()
-  // Handle the "View All Notification" action here
-  console.log('View All Notifications clicked')
+const handleItemClick = (notif) => {
   closeDropdown()
 }
 
 onMounted(() => {
+  loadNotifications()
   document.addEventListener('click', handleClickOutside)
 })
 

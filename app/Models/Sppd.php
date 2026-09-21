@@ -4,18 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sppd extends Model
 {
     protected $table = 'tb_sppd';
+
     protected $fillable = [
-        'nomor_sppd', 'atas_nama', 'nip', 'pangkat_golongan', 'jabatan',
+        'nomor_sppd', 'tahun', 'atas_nama', 'nip', 'pangkat_golongan', 'jabatan',
         'tanggal_mulai', 'tanggal_selesai', 'lama_hari',
         'asal_daerah', 'tujuan_daerah', 'provinsi_tujuan', 'keperluan',
         'status', 'total_biaya',
-        'transport_udara', 'transport_darat_pp', 'taksi_bandara',
+        'transport_udara', 'transport_darat_pp', 'taksi_bandara', 'transport_kendaraan_dinas_pp',
         'golongan', 'kota_asal_pesawat', 'kota_tujuan_pesawat',
         'file_surat_tugas', 'file_sppd',
         'created_by', 'approved_by', 'paid_by',
@@ -27,7 +28,7 @@ class Sppd extends Model
     {
         return Attribute::make(
             get: fn () => $this->file_surat_tugas
-                ? '/storage/' . ltrim($this->file_surat_tugas, '/')
+                ? '/storage/'.ltrim($this->file_surat_tugas, '/')
                 : null,
         );
     }
@@ -36,7 +37,7 @@ class Sppd extends Model
     {
         return Attribute::make(
             get: fn () => $this->file_sppd
-                ? '/storage/' . ltrim($this->file_sppd, '/')
+                ? '/storage/'.ltrim($this->file_sppd, '/')
                 : null,
         );
     }
@@ -44,6 +45,7 @@ class Sppd extends Model
     protected function casts(): array
     {
         return [
+            'tahun' => 'integer',
             'tanggal_mulai' => 'date',
             'tanggal_selesai' => 'date',
             'lama_hari' => 'integer',
@@ -52,6 +54,7 @@ class Sppd extends Model
             'transport_udara' => 'boolean',
             'transport_darat_pp' => 'boolean',
             'taksi_bandara' => 'boolean',
+            'transport_kendaraan_dinas_pp' => 'boolean',
         ];
     }
 

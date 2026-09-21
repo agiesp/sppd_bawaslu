@@ -35,6 +35,7 @@ export interface Sppd {
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean
+  transport_kendaraan_dinas_pp?: boolean
   golongan?: Golongan | null
   kota_asal_pesawat?: string | null
   kota_tujuan_pesawat?: string | null
@@ -69,6 +70,7 @@ export interface SppdPayload {
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean
+  transport_kendaraan_dinas_pp?: boolean
   golongan?: Golongan | null
   kota_asal_pesawat?: string | null
   kota_tujuan_pesawat?: string | null
@@ -84,6 +86,7 @@ export interface CalculatePayload {
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean
+  transport_kendaraan_dinas_pp?: boolean
   kota_asal_pesawat?: string | null
   kota_tujuan_pesawat?: string | null
   uang_saku?: number

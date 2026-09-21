@@ -12,6 +12,35 @@
     <div
       class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-white/[0.03]"
     >
+      <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+          <button
+            v-for="tab in tabs"
+            :key="tab.key"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200"
+            :class="
+              activeTab === tab.key
+                ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            "
+            @click="activeTab = tab.key"
+          >
+            {{ tab.label }}
+            <span
+              class="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+              :class="
+                activeTab === tab.key
+                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300'
+                  : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+              "
+            >
+              {{ tab.count }}
+            </span>
+          </button>
+        </div>
+      </div>
+
       <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <div class="group relative flex-1">
@@ -286,7 +315,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -298,18 +327,22 @@ import EditIcon from '@/icons/EditIcon.vue'
 import TrashIcon from '@/icons/TrashIcon.vue'
 import { usePermission } from '@/composables/usePermission'
 import { useToast } from '@/composables/useToast'
+import { useTahun } from '@/composables/useTahun'
 import { deleteSppd } from '@/api/sppd'
 import TaskIcon from '@/icons/TaskIcon.vue'
+
+type PegawaiTipe = 'pegawai' | 'komisioner'
 
 interface SppdItem {
   id: number | string
   nomor_sppd: string
+  tahun?: number | null
   atas_nama: string
   nip: string | null
   keperluan: string | null
   tujuan_daerah: string
   provinsi: string
-  pegawai?: { avatar_url: string | null } | null
+  pegawai?: { avatar_url: string | null; tipe: PegawaiTipe } | null
   tanggal_mulai: string
   tanggal_selesai: string
   lama_hari: number
@@ -323,6 +356,7 @@ const props = defineProps<{
 
 const { canView, canCreate, canEdit, canDelete } = usePermission()
 const { success, error } = useToast()
+const { selectedTahun } = useTahun()
 const menuUrl = '/sppd'
 
 const search = ref('')
@@ -330,8 +364,33 @@ const statusFilter = ref('')
 const currentPage = ref(1)
 const perPage = 10
 
+const activeTab = ref<'semua' | PegawaiTipe>('semua')
+
 const deleteTarget = ref<SppdItem | null>(null)
 const deleting = ref(false)
+
+const byYear = computed(() => {
+  if (!selectedTahun.value) return props.sppdList
+  const tahun = Number(selectedTahun.value)
+  return props.sppdList.filter((item) => {
+    const itemTahun = item.tahun ?? new Date(item.tanggal_mulai).getFullYear()
+    return itemTahun === tahun
+  })
+})
+
+const tabs = computed(() => [
+  { key: 'semua' as const, label: 'Semua', count: byYear.value.length },
+  {
+    key: 'pegawai' as const,
+    label: 'Pegawai ASN',
+    count: byYear.value.filter((i) => i.pegawai?.tipe === 'pegawai').length,
+  },
+  {
+    key: 'komisioner' as const,
+    label: 'Pegawai Bawaslu',
+    count: byYear.value.filter((i) => i.pegawai?.tipe === 'komisioner').length,
+  },
+])
 
 const openDeleteModal = (item: SppdItem): void => {
   deleteTarget.value = item
@@ -373,7 +432,11 @@ const formatTanggal = (dateStr: string): string => {
 }
 
 const filteredData = computed(() => {
-  let data = props.sppdList
+  let data = byYear.value
+
+  if (activeTab.value !== 'semua') {
+    data = data.filter((item) => item.pegawai?.tipe === activeTab.value)
+  }
 
   if (statusFilter.value) {
     data = data.filter((item) => item.status === statusFilter.value)
@@ -396,5 +459,9 @@ const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * perPage
   const end = start + perPage
   return filteredData.value.slice(start, end)
+})
+
+watch([activeTab, statusFilter, search, selectedTahun], () => {
+  currentPage.value = 1
 })
 </script>

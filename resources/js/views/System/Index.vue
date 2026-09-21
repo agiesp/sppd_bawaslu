@@ -125,6 +125,43 @@
                 Gambar latar yang ditampilkan pada panel visual halaman login.
               </p>
             </div>
+
+            <div class="sm:col-span-2 border-t border-gray-100 pt-6 dark:border-gray-800">
+              <h4 class="mb-4 text-sm font-semibold text-gray-800 dark:text-white/90">
+                Pengaturan Tahun SPPD
+              </h4>
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                    Daftar Tahun
+                  </label>
+                  <input
+                    v-model="form.list_tahun"
+                    type="text"
+                    placeholder="2026,2027"
+                    class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                  />
+                  <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                    Pisahkan tiap tahun dengan koma. Contoh: 2026,2027
+                  </p>
+                </div>
+
+                <div>
+                  <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                    Tahun Default
+                  </label>
+                  <input
+                    v-model="form.default_tahun"
+                    type="text"
+                    placeholder="2026"
+                    class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                  />
+                  <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                    Tahun default yang digunakan pada pengisian SPPD baru.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

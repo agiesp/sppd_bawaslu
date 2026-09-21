@@ -1,25 +1,25 @@
 <template>
   <div class="max-w-full overflow-x-auto custom-scrollbar">
     <div id="chartFinancing" class="-ml-5 min-w-[500px] xl:min-w-full pl-2">
-      <VueApexCharts type="bar" height="300" :options="chartOptions" :series="series" />
+      <div v-if="series.length === 0" class="flex h-[300px] items-center justify-center text-sm text-slate-400 dark:text-gray-500">
+        Belum ada data pembiayaan.
+      </div>
+      <VueApexCharts v-else type="bar" height="300" :options="chartOptions" :series="series" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+import { fetchDashboardFinancing } from '@/api/dashboard'
 
-const series = ref([
-  {
-    name: 'PNS',
-    data: [42, 38, 51, 47, 55, 49, 60, 58, 62, 66, 70, 65],
-  },
-  {
-    name: 'Komisioner',
-    data: [25, 22, 30, 28, 33, 31, 38, 36, 40, 44, 46, 42],
-  },
-])
+const props = defineProps({
+  tahun: { type: [Number, String], default: null },
+})
+
+const series = ref([])
+const isDark = ref(false)
 
 const formatRupiah = (value) =>
   new Intl.NumberFormat('id-ID', {
@@ -28,14 +28,17 @@ const formatRupiah = (value) =>
     maximumFractionDigits: 0,
   }).format(value)
 
-const chartOptions = ref({
-  colors: ['#fb6514', '#fd853a'],
+const axisColor = () => (isDark.value ? '#9ca3af' : '#6b7280')
+
+const chartOptions = computed(() => ({
+  colors: ['#fb6514', '#6366f1'],
   chart: {
     fontFamily: 'Outfit, sans-serif',
     type: 'bar',
     toolbar: {
       show: false,
     },
+    foreColor: axisColor(),
   },
   plotOptions: {
     bar: {
@@ -61,12 +64,16 @@ const chartOptions = ref({
     axisTicks: {
       show: false,
     },
+    labels: {
+      style: { colors: axisColor() },
+    },
   },
   legend: {
     show: true,
     position: 'top',
     horizontalAlign: 'left',
     fontFamily: 'Outfit',
+    labels: { colors: axisColor() },
     markers: {
       radius: 99,
     },
@@ -75,6 +82,7 @@ const chartOptions = ref({
     title: false,
     labels: {
       formatter: (value) => `Rp ${value} jt`,
+      style: { colors: axisColor() },
     },
   },
   grid: {
@@ -95,5 +103,30 @@ const chartOptions = ref({
       formatter: (value) => formatRupiah(value * 1000000),
     },
   },
+}))
+
+const loadData = async () => {
+  try {
+    const res = await fetchDashboardFinancing(props.tahun ?? new Date().getFullYear())
+    series.value = res.series ?? []
+  } catch {
+    series.value = []
+  }
+}
+
+watch(() => props.tahun, loadData)
+
+let observer = null
+
+onMounted(() => {
+  loadData()
+  const check = () => {
+    isDark.value = document.documentElement.classList.contains('dark')
+  }
+  check()
+  observer = new MutationObserver(check)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 })
+
+onBeforeUnmount(() => observer?.disconnect())
 </script>
