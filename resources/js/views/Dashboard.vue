@@ -233,6 +233,14 @@ const projectCards = computed(() => {
   const asnProgress = total > 0 ? Math.round((asn / total) * 100) : 0
   const komisioner = metrics.value?.sppd_komisioner ?? 0
   const komisionerProgress = total > 0 ? Math.round((komisioner / total) * 100) : 0
+  const dalam = metrics.value?.sppd_dalam ?? 0
+  const dalamProgress = total > 0 ? Math.round((dalam / total) * 100) : 0
+  const luar = metrics.value?.sppd_luar ?? 0
+  const luarProgress = total > 0 ? Math.round((luar / total) * 100) : 0
+
+  const avatarList = (metrics.value?.asn_avatars ?? [])
+  const dalamTeam = avatarList.map((a) => ({ name: a.name, url: a.avatar_url })).slice(0, 1)
+  const luarTeam = avatarList.map((a) => ({ name: a.name, url: a.avatar_url })).slice(0, 2)
 
   return [
     {
@@ -255,21 +263,21 @@ const projectCards = computed(() => {
     },
     {
       title: 'SPPD Dalam Daerah',
-      tag: 'Selesai',
+      tag: `${dalam} SPPD`,
       tagColor: 'bg-purple-50 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300',
-      progress: 20,
+      progress: dalamProgress,
       barColor: 'bg-purple-500',
-      team: [{ name: 'Staf', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' }],
-      time: '1 hari lalu',
+      team: dalamTeam.length ? dalamTeam : [{ name: 'Staf', url: null }],
+      time: `${dalamProgress}% dari ${total} total`,
     },
     {
       title: 'SPPD Luar Daerah',
-      tag: 'Selesai',
+      tag: `${luar} SPPD`,
       tagColor: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300',
-      progress: 90,
+      progress: luarProgress,
       barColor: 'bg-emerald-500',
-      team: [{ name: 'ASN 1', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' }, { name: 'ASN 2', url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' }],
-      time: '3 jam lalu',
+      team: luarTeam.length ? luarTeam : [{ name: 'ASN', url: null }],
+      time: `${luarProgress}% dari ${total} total`,
     },
   ]
 })

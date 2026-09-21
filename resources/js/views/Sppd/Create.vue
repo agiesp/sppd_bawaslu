@@ -268,10 +268,35 @@
           </button>
         </div>
 
-        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+       
+
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 mt-6">
+          <div>
+            <label for="golongan" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Golongan
+            </label>
+            <div class="group relative">
+              <span
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
+              >
+                <BarChartIcon class="h-4 w-4" />
+              </span>
+              <select id="golongan" v-model="golongan" :class="inputClass">
+                <option v-for="opt in golonganOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          
+        </div>
+
+         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400 mt-6">
           Jenis SPPD<span class="text-error-500">*</span>
         </label>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 ">
           <label class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200" :class="jenisSppdCard('dalam')">
             <input v-model="jenisSppd" type="radio" name="jenis_sppd" value="dalam" class="peer sr-only" />
             <span
@@ -301,40 +326,7 @@
           </label>
         </div>
 
-        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <div>
-            <label for="golongan" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-              Golongan
-            </label>
-            <div class="group relative">
-              <span
-                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:text-gray-500 dark:group-focus-within:text-blue-400"
-              >
-                <BarChartIcon class="h-4 w-4" />
-              </span>
-              <select id="golongan" v-model="golongan" :class="inputClass">
-                <option v-for="opt in golonganOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="lg:col-span-2">
-            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-              Lama Perjalanan
-              <span class="text-xs font-normal text-gray-400 dark:text-gray-500">(otomatis dari tanggal)</span>
-            </label>
-            <div class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-2.5 text-sm text-gray-600 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
-              <Calendar2Line class="h-4 w-4 text-gray-400" />
-              <span class="font-semibold text-gray-800 dark:text-white/90">{{ lamaHari }}</span>
-              <span>hari</span>
-              <span class="hidden text-gray-400 sm:inline">
-                ({{ form.tanggal_mulai || '--' }} s.d. {{ form.tanggal_selesai || '--' }})
-              </span>
-            </div>
-          </div>
-        </div>
+        
 
         <div class="mt-6">
           <div class="mb-3 flex items-center gap-2">
@@ -484,6 +476,43 @@
                 Taksi Bandara (PP)
               </span>
             </label>
+
+            <label
+              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
+              :class="[
+                daerahDalam
+                  ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:opacity-40'
+                  : '',
+                uangSakuAktif
+                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
+                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5',
+              ]"
+            >
+              <input v-model="uangSakuAktif" type="checkbox" class="peer sr-only" :disabled="daerahDalam" />
+              <span
+                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
+                :class="
+                  uangSakuAktif
+                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
+                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
+                "
+              >
+                <CheckIcon
+                  class="h-3.5 w-3.5 transition-all duration-200"
+                  :class="uangSakuAktif ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+                />
+              </span>
+              <span
+                class="text-sm font-medium transition-colors"
+                :class="
+                  uangSakuAktif
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
+                Uang Saku
+              </span>
+            </label>
           </div>
 
           <div v-if="transportUdara" class="mt-4 rounded-xl border border-brand-100 bg-brand-50/40 p-4 dark:border-brand-900/40 dark:bg-brand-500/5">
@@ -531,57 +560,7 @@
           </div>
         </div>
 
-        <div class="mt-6">
-          <div class="mb-3 flex items-center gap-2">
-            <h4 class="text-sm font-semibold text-gray-800 dark:text-white/90">Uang Saku</h4>
-            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">opsional</span>
-          </div>
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label
-              class="group relative flex cursor-pointer select-none items-center gap-3 rounded-xl border p-3.5 transition-all duration-200"
-              :class="[
-                daerahDalam
-                  ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:opacity-40'
-                  : '',
-                uangSakuAktif
-                  ? 'border-brand-500 bg-brand-50/80 shadow-sm ring-1 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:ring-brand-500/30'
-                  : 'border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5',
-              ]"
-            >
-              <input v-model="uangSakuAktif" type="checkbox" class="peer sr-only" :disabled="daerahDalam" />
-              <span
-                class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200"
-                :class="
-                  uangSakuAktif
-                    ? 'border-transparent bg-gradient-to-br from-brand-500 to-brand-400 shadow-sm shadow-brand-500/40'
-                    : 'border-gray-300 bg-white group-hover:border-brand-400 group-hover:shadow-sm dark:border-gray-600 dark:bg-white/[0.05]'
-                "
-              >
-                <CheckIcon
-                  class="h-3.5 w-3.5 transition-all duration-200"
-                  :class="uangSakuAktif ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
-                />
-              </span>
-              <span
-                class="text-sm font-medium transition-colors"
-                :class="
-                  uangSakuAktif
-                    ? 'text-brand-700 dark:text-brand-300'
-                    : 'text-gray-700 dark:text-gray-300'
-                "
-              >
-                Uang Saku
-              </span>
-            </label>
-
-            <div class="flex items-center gap-2.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 px-4 py-4 dark:border-gray-700 dark:bg-white/[0.03]">
-              <InfoIcon class="h-4 w-4 shrink-0 text-gray-400" />
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Nominal uang saku dan jumlah hari dapat diubah di tabel rincian setelah biaya dihitung.
-              </p>
-            </div>
-          </div>
-        </div>
+  
 
         <p v-if="calcError" class="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">
           {{ calcError }}
@@ -775,6 +754,7 @@ interface SppdProp {
   tujuan_daerah: string
   provinsi_tujuan: number
   keperluan: string | null
+  jenis_sppd: 'dalam' | 'luar'
   status: string
   lama_hari: number
   total_biaya: number
@@ -850,7 +830,7 @@ const uangSaku = ref<number>(savedUangSaku?.satuan ?? 0)
 const uangSakuHari = ref<number>(savedUangSaku?.hari ?? 0)
 const uangSakuAktif = ref<boolean>(Boolean(savedUangSaku))
 
-const jenisSppd = ref<'dalam' | 'luar'>('luar')
+const jenisSppd = ref<'dalam' | 'luar'>(props.sppd?.jenis_sppd ?? 'luar')
 const daerahDalam = computed(() => jenisSppd.value === 'dalam')
 const jenisSppdCard = (opt: 'dalam' | 'luar'): string =>
   jenisSppd.value === opt
@@ -1047,6 +1027,7 @@ const buildCalculatePayload = (): CalculatePayload => ({
   tanggal_mulai: form.tanggal_mulai,
   tanggal_selesai: form.tanggal_selesai,
   golongan: golongan.value,
+  jenis_sppd: jenisSppd.value,
   transport_udara: transportUdara.value,
   transport_darat_pp: transportDarat.value,
   transport_kendaraan_dinas_pp: transportKendaraanDinas.value,
@@ -1102,6 +1083,7 @@ const handleSimpan = async (): Promise<void> => {
       tujuan_daerah: form.tujuan_daerah,
       provinsi_tujuan: Number(form.provinsi_tujuan),
       keperluan: form.keperluan || null,
+      jenis_sppd: jenisSppd.value,
       transport_udara: transportUdara.value,
       transport_darat_pp: transportDarat.value,
       transport_kendaraan_dinas_pp: transportKendaraanDinas.value,

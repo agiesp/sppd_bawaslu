@@ -58,6 +58,7 @@ class SppdController extends Controller
             'tujuan_daerah' => 'required|string|max:100',
             'provinsi_tujuan' => 'required|integer|exists:ref_provinsi,id_provinsi',
             'keperluan' => 'nullable|string',
+            'jenis_sppd' => 'nullable|in:dalam,luar',
             'nomor_sppd' => 'nullable|string|max:50|unique:tb_sppd,nomor_sppd',
             'transport_udara' => 'nullable|boolean',
             'transport_darat_pp' => 'nullable|boolean',
@@ -72,6 +73,7 @@ class SppdController extends Controller
         $validated['lama_hari'] = $lamaHari;
         $validated['tahun'] = (int) Carbon::parse($validated['tanggal_mulai'])->year;
         $validated['asal_daerah'] = 'Sigli';
+        $validated['jenis_sppd'] = $validated['jenis_sppd'] ?? 'luar';
         $validated['status'] = 'draft';
         $validated['total_biaya'] = 0;
         $validated['created_by'] = $request->user()->id;
@@ -124,6 +126,7 @@ class SppdController extends Controller
             'tujuan_daerah' => 'sometimes|string|max:100',
             'provinsi_tujuan' => 'sometimes|integer|exists:ref_provinsi,id_provinsi',
             'keperluan' => 'nullable|string',
+            'jenis_sppd' => 'nullable|in:dalam,luar',
             'status' => 'sometimes|in:draft,proses,selesai,batal',
             'nomor_sppd' => 'sometimes|nullable|string|max:50|unique:tb_sppd,nomor_sppd,'.$sppd->id,
             'transport_udara' => 'nullable|boolean',
@@ -171,6 +174,7 @@ class SppdController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'golongan' => 'required|in:eselon_1,eselon_2,eselon_3,eselon_4',
+            'jenis_sppd' => 'nullable|in:dalam,luar',
             'transport_udara' => 'nullable|boolean',
             'transport_darat_pp' => 'nullable|boolean',
             'taksi_bandara' => 'nullable|boolean',

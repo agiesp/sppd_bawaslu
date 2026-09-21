@@ -2,6 +2,8 @@ import type { Provinsi, Pegawai } from './pegawai'
 
 export type SppdStatus = 'draft' | 'proses' | 'selesai' | 'batal'
 
+export type JenisSppd = 'dalam' | 'luar'
+
 export type FileDokumenJenis = 'surat_tugas' | 'sppd'
 
 export interface SppdRincian {
@@ -31,6 +33,7 @@ export interface Sppd {
   tujuan_daerah: string
   provinsi_tujuan: number
   keperluan: string | null
+  jenis_sppd: JenisSppd
   status: SppdStatus
   transport_udara?: boolean
   transport_darat_pp?: boolean
@@ -67,6 +70,7 @@ export interface SppdPayload {
   tujuan_daerah: string
   provinsi_tujuan: number
   keperluan?: string | null
+  jenis_sppd?: JenisSppd
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean
@@ -83,6 +87,7 @@ export interface CalculatePayload {
   tanggal_mulai: string
   tanggal_selesai: string
   golongan: Golongan
+  jenis_sppd?: JenisSppd
   transport_udara?: boolean
   transport_darat_pp?: boolean
   taksi_bandara?: boolean

@@ -26,6 +26,8 @@ class DashboardController extends Controller
 
         $sppdAsn = Sppd::whereHas('pegawai', fn ($q) => $q->where('tipe', 'pegawai'))->count();
         $sppdKomisioner = Sppd::whereHas('pegawai', fn ($q) => $q->where('tipe', 'komisioner'))->count();
+        $sppdDalam = Sppd::where('jenis_sppd', 'dalam')->count();
+        $sppdLuar = Sppd::where('jenis_sppd', 'luar')->count();
 
         $recentSppd = Sppd::orderBy('created_at', 'desc')
             ->limit(5)
@@ -72,6 +74,8 @@ class DashboardController extends Controller
             'total_biaya' => $totalBiaya,
             'sppd_asn' => $sppdAsn,
             'sppd_komisioner' => $sppdKomisioner,
+            'sppd_dalam' => $sppdDalam,
+            'sppd_luar' => $sppdLuar,
             'asn_avatars' => $asnAvatars,
             'komisioner_avatars' => $komisionerAvatars,
             'recent_sppd' => $recentSppd,

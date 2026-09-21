@@ -14,7 +14,7 @@ class Sppd extends Model
     protected $fillable = [
         'nomor_sppd', 'tahun', 'atas_nama', 'nip', 'pangkat_golongan', 'jabatan',
         'tanggal_mulai', 'tanggal_selesai', 'lama_hari',
-        'asal_daerah', 'tujuan_daerah', 'provinsi_tujuan', 'keperluan',
+        'asal_daerah', 'tujuan_daerah', 'provinsi_tujuan', 'keperluan', 'jenis_sppd',
         'status', 'total_biaya',
         'transport_udara', 'transport_darat_pp', 'taksi_bandara', 'transport_kendaraan_dinas_pp',
         'golongan', 'kota_asal_pesawat', 'kota_tujuan_pesawat',
@@ -51,6 +51,7 @@ class Sppd extends Model
             'lama_hari' => 'integer',
             'provinsi_tujuan' => 'integer',
             'total_biaya' => 'integer',
+            'jenis_sppd' => 'string',
             'transport_udara' => 'boolean',
             'transport_darat_pp' => 'boolean',
             'taksi_bandara' => 'boolean',

@@ -8,6 +8,8 @@ export interface DashboardMetrics {
   total_biaya: number
   sppd_asn: number
   sppd_komisioner: number
+  sppd_dalam: number
+  sppd_luar: number
   asn_avatars: Array<{
     name: string
     avatar_url: string | null
