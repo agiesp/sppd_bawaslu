@@ -18,11 +18,11 @@ class Sppd extends Model
         'status', 'total_biaya',
         'transport_udara', 'transport_darat_pp', 'taksi_bandara', 'transport_kendaraan_dinas_pp',
         'golongan', 'kota_asal_pesawat', 'kota_tujuan_pesawat',
-        'file_surat_tugas', 'file_sppd',
+        'file_surat_tugas', 'file_sppd', 'file_laporan',
         'created_by', 'approved_by', 'paid_by',
     ];
 
-    protected $appends = ['file_surat_tugas_url', 'file_sppd_url'];
+    protected $appends = ['file_surat_tugas_url', 'file_sppd_url', 'file_laporan_url'];
 
     protected function fileSuratTugasUrl(): Attribute
     {
@@ -38,6 +38,15 @@ class Sppd extends Model
         return Attribute::make(
             get: fn () => $this->file_sppd
                 ? '/storage/'.ltrim($this->file_sppd, '/')
+                : null,
+        );
+    }
+
+    protected function fileLaporanUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->file_laporan
+                ? '/storage/'.ltrim($this->file_laporan, '/')
                 : null,
         );
     }

@@ -322,7 +322,7 @@ class SppdController extends Controller
     public function uploadDokumen(Request $request, Sppd $sppd)
     {
         $validated = $request->validate([
-            'jenis' => 'required|in:surat_tugas,sppd',
+            'jenis' => 'required|in:surat_tugas,sppd,laporan',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
         ]);
 
@@ -346,7 +346,7 @@ class SppdController extends Controller
     public function hapusDokumen(Request $request, Sppd $sppd)
     {
         $validated = $request->validate([
-            'jenis' => 'required|in:surat_tugas,sppd',
+            'jenis' => 'required|in:surat_tugas,sppd,laporan',
         ]);
 
         $column = $this->dokumenColumn($validated['jenis']);
@@ -365,7 +365,11 @@ class SppdController extends Controller
 
     private function dokumenColumn(string $jenis): string
     {
-        return $jenis === 'surat_tugas' ? 'file_surat_tugas' : 'file_sppd';
+        return match ($jenis) {
+            'surat_tugas' => 'file_surat_tugas',
+            'laporan' => 'file_laporan',
+            default => 'file_sppd',
+        };
     }
 
     public function cetak(Sppd $sppd): Response
@@ -374,6 +378,16 @@ class SppdController extends Controller
 
         return Inertia::render('Sppd/Cetak', [
             'sppd' => $sppd,
+        ]);
+    }
+
+    public function cetakPerincian(Sppd $sppd): Response
+    {
+        $sppd->load(['rincian', 'provinsi', 'pegawai', 'creator', 'approver', 'payer']);
+
+        return Inertia::render('Sppd/CetakPerincian', [
+            'sppd' => $sppd,
+            'terbilang' => $this->terbilang((int) $sppd->total_biaya),
         ]);
     }
 

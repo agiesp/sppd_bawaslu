@@ -165,6 +165,14 @@
                 @select="handleDokumenSelected('sppd', $event)"
                 @remove="handleDokumenRemove('sppd')"
               />
+              <FileDropzone
+                label="Laporan"
+                :url="sppd.file_laporan_url"
+                :editable="canEdit(menuUrl)"
+                :busy="uploadingJenis === 'laporan'"
+                @select="handleDokumenSelected('laporan', $event)"
+                @remove="handleDokumenRemove('laporan')"
+              />
             </div>
             <p v-if="dokumenError" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ dokumenError }}</p>
           </div>
@@ -522,8 +530,10 @@ interface SppdProp {
   created_at: string
   file_surat_tugas?: string | null
   file_sppd?: string | null
+  file_laporan?: string | null
   file_surat_tugas_url?: string | null
   file_sppd_url?: string | null
+  file_laporan_url?: string | null
   provinsi?: { id_provinsi: number; nama_provinsi: string } | null
   rincian?: {
     id: number
@@ -622,7 +632,12 @@ const handleDokumenSelected = async (jenis: FileDokumenJenis, file: File): Promi
     await uploadDokumen(props.sppd.id, jenis, file)
     router.reload()
   } catch {
-    const nama = jenis === 'surat_tugas' ? 'Surat Tugas' : 'SPPD'
+    const labelMap: Record<FileDokumenJenis, string> = {
+      surat_tugas: 'Surat Tugas',
+      sppd: 'SPPD',
+      laporan: 'Laporan',
+    }
+    const nama = labelMap[jenis]
     dokumenError.value = `Gagal mengunggah dokumen ${nama}. Gunakan format PDF/JPG/PNG/WEBP maksimal 10 MB.`
   } finally {
     uploadingJenis.value = null
@@ -630,7 +645,12 @@ const handleDokumenSelected = async (jenis: FileDokumenJenis, file: File): Promi
 }
 
 const handleDokumenRemove = async (jenis: FileDokumenJenis): Promise<void> => {
-  const nama = jenis === 'surat_tugas' ? 'Surat Tugas' : 'SPPD'
+  const labelMap: Record<FileDokumenJenis, string> = {
+    surat_tugas: 'Surat Tugas',
+    sppd: 'SPPD',
+    laporan: 'Laporan',
+  }
+  const nama = labelMap[jenis]
   if (!window.confirm(`Hapus dokumen ${nama}?`)) return
   uploadingJenis.value = jenis
   dokumenError.value = ''

@@ -2,10 +2,10 @@
   <AdminLayout>
     <div class="space-y-6">
       <!-- Dashboard Header & Top Status Bar -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <h1 class="text-xl font-bold text-slate-900 tracking-tight dark:text-gray-100">Dashboard</h1>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
           <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>Pegawai: <strong class="text-slate-900 dark:text-gray-100">4</strong></span>
@@ -15,7 +15,7 @@
             <span>Tujuan Daerah: <strong class="text-slate-900 dark:text-gray-100">8</strong></span>
           </div>
           <!-- Team Member Avatars Stack -->
-          <div class="flex -space-x-2 overflow-hidden bg-white p-1 rounded-xl border border-slate-200 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div class="hidden md:flex -space-x-2 overflow-hidden bg-white p-1 rounded-xl border border-slate-200 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-900" src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100" />
             <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-900" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100" />
             <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-900" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" />
@@ -76,7 +76,7 @@
         <!-- Develop Web App Timeline Section (2 Columns) -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between dark:border-gray-800 dark:bg-gray-900">
           <div>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <div>
                 <h3 class="font-bold text-slate-900 text-base dark:text-gray-100">Jadwal Perjalanan Dinas</h3>
                 <p class="text-xs text-slate-400 dark:text-gray-500">Timeline & Rencana SPPD</p>
@@ -119,8 +119,8 @@
               
 
               <template v-if="loadingSchedule">
-                <div v-for="i in 3" :key="'skel-'+i" class="flex items-center gap-4 relative z-10">
-                  <div class="w-32 h-4 rounded bg-slate-100 animate-pulse dark:bg-gray-800"></div>
+                <div v-for="i in 3" :key="'skel-'+i" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 relative z-10">
+                  <div class="sm:w-32 h-4 rounded bg-slate-100 animate-pulse dark:bg-gray-800"></div>
                   <div class="flex-1 h-9 rounded-xl bg-slate-100 animate-pulse dark:bg-gray-800"></div>
                 </div>
               </template>
@@ -128,10 +128,10 @@
               <div
                 v-for="(s, idx) in monthSchedules"
                 :key="s.id"
-                class="flex items-center gap-4 relative z-10"
+                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 relative z-10"
               >
-                <div class="w-32 text-xs font-semibold truncate" :class="schedulePalette[idx % schedulePalette.length].text" :title="s.tujuan_daerah">{{ s.tujuan_daerah }}</div>
-                <div :class="['flex-1 px-4 py-2 rounded-xl text-xs font-medium flex items-center justify-between gap-2 shadow-xs transition', schedulePalette[idx % schedulePalette.length].bar]">
+                <div class="sm:w-32 text-xs font-semibold truncate" :class="schedulePalette[idx % schedulePalette.length].text" :title="s.tujuan_daerah">{{ s.tujuan_daerah }}</div>
+                <div :class="['flex-1 px-4 py-2 rounded-xl text-xs font-medium flex flex-col md:flex-row md:items-center md:justify-between gap-2 shadow-xs transition', schedulePalette[idx % schedulePalette.length].bar]">
                   <div class="min-w-0">
                     <span class="block truncate">{{ s.keperluan || s.nomor_sppd }}</span>
                     <span class="block text-[10px] opacity-70">{{ formatTanggal(s.tanggal_mulai) }} - {{ formatTanggal(s.tanggal_selesai) }} ({{ s.lama_hari }} hari)</span>

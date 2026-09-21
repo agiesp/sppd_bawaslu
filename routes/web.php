@@ -41,6 +41,7 @@ Route::post('/sppd/bukti', [SppdController::class, 'uploadBukti'])->middleware('
 Route::post('/sppd/{sppd}/dokumen', [SppdController::class, 'uploadDokumen'])->middleware('auth', 'permission:/sppd:edit');
 Route::delete('/sppd/{sppd}/dokumen', [SppdController::class, 'hapusDokumen'])->middleware('auth', 'permission:/sppd:edit');
 Route::get('/sppd/{sppd}/cetak', [SppdController::class, 'cetak'])->middleware('auth', 'permission:/sppd:view');
+Route::get('/sppd/{sppd}/cetak/perincian', [SppdController::class, 'cetakPerincian'])->middleware('auth', 'permission:/sppd:view');
 
 // Referensi
 Route::get('/admin/referensi', [ReferensiController::class, 'index'])->middleware('auth', 'permission:/admin/referensi:view');

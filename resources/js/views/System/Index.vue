@@ -229,6 +229,71 @@
             </div>
           </div>
         </div>
+        <div v-show="activeTab === 'cetak'">
+          <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            Nama dan NIP pejabat yang ditampilkan pada dokumen cetakan SPPD (Perincian Biaya).
+          </p>
+
+          <div class="mb-6">
+            <h4 class="mb-4 text-sm font-semibold text-gray-800 dark:text-white/90">
+              Pejabat Pembuat Komitmen (PPK)
+            </h4>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                  Nama
+                </label>
+                <input
+                  v-model="form.print_ppk_nama"
+                  type="text"
+                  placeholder="Nama PPK"
+                  class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                />
+              </div>
+              <div>
+                <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                  NIP
+                </label>
+                <input
+                  v-model="form.print_ppk_nip"
+                  type="text"
+                  placeholder="NIP PPK"
+                  class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="mb-4 text-sm font-semibold text-gray-800 dark:text-white/90">
+              Bendahara Pengeluaran Pembantu
+            </h4>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                  Nama
+                </label>
+                <input
+                  v-model="form.print_bendahara_nama"
+                  type="text"
+                  placeholder="Nama Bendahara"
+                  class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                />
+              </div>
+              <div>
+                <label class="mb-2.5 block text-sm font-medium text-gray-800 dark:text-white/90">
+                  NIP
+                </label>
+                <input
+                  v-model="form.print_bendahara_nip"
+                  type="text"
+                  placeholder="NIP Bendahara"
+                  class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-white/5 dark:text-white/90 dark:placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -278,6 +343,7 @@ const menuUrl = '/admin/system'
 const tabs = [
   { key: 'informasi', label: 'Informasi Umum' },
   { key: 'kontak', label: 'Kontak' },
+  { key: 'cetak', label: 'Cetak / Tanda Tangan' },
 ]
 
 const activeTab = ref('informasi')

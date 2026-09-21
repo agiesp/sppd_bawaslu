@@ -4,7 +4,7 @@ export type SppdStatus = 'draft' | 'proses' | 'selesai' | 'batal'
 
 export type JenisSppd = 'dalam' | 'luar'
 
-export type FileDokumenJenis = 'surat_tugas' | 'sppd'
+export type FileDokumenJenis = 'surat_tugas' | 'sppd' | 'laporan'
 
 export interface SppdRincian {
   id: number
@@ -44,8 +44,10 @@ export interface Sppd {
   kota_tujuan_pesawat?: string | null
   file_surat_tugas?: string | null
   file_sppd?: string | null
+  file_laporan?: string | null
   file_surat_tugas_url?: string | null
   file_sppd_url?: string | null
+  file_laporan_url?: string | null
   total_biaya: number
   created_by: number | null
   approved_by: number | null
