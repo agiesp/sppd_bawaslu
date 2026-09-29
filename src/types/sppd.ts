@@ -17,6 +17,12 @@ export interface SppdRincian {
   keterangan: string | null
   bukti: string | null
   bukti_url: string | null
+  maskapai?: string | null
+  no_booking?: string | null
+  no_tiket?: string | null
+  no_penerbangan?: string | null
+  nama_hotel?: string | null
+  no_kamar?: string | null
 }
 
 export interface Sppd {
@@ -109,6 +115,12 @@ export interface CalculateRincian {
   keterangan: string
   bukti?: string | null
   bukti_url?: string | null
+  maskapai?: string | null
+  no_booking?: string | null
+  no_tiket?: string | null
+  no_penerbangan?: string | null
+  nama_hotel?: string | null
+  no_kamar?: string | null
 }
 
 export interface CalculateResult {

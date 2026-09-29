@@ -86,7 +86,7 @@
               <th class="w-10">No</th>
               <th>Perincian Biaya</th>
               <th class="w-40">Jumlah</th>
-              <th class="w-40">Keterangan</th>
+              <th class="w-20">Ket</th>
             </tr>
             <tr class="text-center text-xs italic bg-gray-50/50">
               <th class="py-0.5">1</th>

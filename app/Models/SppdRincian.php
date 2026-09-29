@@ -10,7 +10,7 @@ class SppdRincian extends Model
 {
     protected $table = 'tb_sppd_rincian';
     public $timestamps = false;
-    protected $fillable = ['id_sppd', 'tahun', 'jenis_biaya', 'uraian', 'hari', 'satuan', 'jumlah', 'keterangan', 'bukti'];
+    protected $fillable = ['id_sppd', 'tahun', 'jenis_biaya', 'uraian', 'hari', 'satuan', 'jumlah', 'keterangan', 'bukti', 'maskapai', 'no_booking', 'no_tiket', 'no_penerbangan', 'nama_hotel', 'no_kamar'];
 
     protected $appends = ['bukti_url'];
 

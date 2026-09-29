@@ -287,6 +287,12 @@ class SppdController extends Controller
             'rincian.*.jumlah' => 'required|integer|min:0',
             'rincian.*.keterangan' => 'nullable|string',
             'rincian.*.bukti' => 'nullable|string|max:255',
+            'rincian.*.maskapai' => 'nullable|string|max:100',
+            'rincian.*.no_booking' => 'nullable|string|max:50',
+            'rincian.*.no_tiket' => 'nullable|string|max:50',
+            'rincian.*.no_penerbangan' => 'nullable|string|max:30',
+            'rincian.*.nama_hotel' => 'nullable|string|max:100',
+            'rincian.*.no_kamar' => 'nullable|string|max:30',
         ]);
 
         $sppd->rincian()->delete();

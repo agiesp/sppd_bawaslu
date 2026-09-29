@@ -193,14 +193,6 @@
         </button>
       </div>
 
-      <input
-        ref="buktiInput"
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png,.webp"
-        class="hidden"
-        @change="onBuktiSelected"
-      />
-
       <p v-if="uploadError" class="mb-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">
         {{ uploadError }}
       </p>
@@ -360,7 +352,10 @@
             <tbody>
               <tr v-for="(item, index) in calcResult.rincian" :key="index" class="border-b border-gray-100 dark:border-gray-800">
                 <td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{{ index + 1 }}</td>
-                <td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{{ item.uraian }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+                  {{ item.uraian }}
+                  <span v-if="rincianDetail(item)" class="block text-[11px] text-gray-400 dark:text-gray-500">{{ rincianDetail(item) }}</span>
+                </td>
                 <td class="px-3 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{{ item.hari }}</td>
                 <td class="px-3 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatRupiah(item.satuan) }}</td>
                 <td class="px-3 py-2 text-right text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatRupiah(item.jumlah) }}</td>
@@ -380,6 +375,14 @@
                       </a>
                       <button
                         type="button"
+                        class="text-gray-400 transition-colors hover:text-brand-500 dark:hover:text-brand-400"
+                        title="Ubah detail bukti"
+                        @click="openBuktiModal('calc', index)"
+                      >
+                        <EditIcon class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
                         class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
                         title="Hapus bukti"
                         @click="removeBukti('calc', index)"
@@ -390,13 +393,12 @@
                     <button
                       v-else
                       type="button"
-                      :disabled="uploadingKey === `calc-${index}`"
-                      class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
                       title="Unggah bukti"
-                      @click="triggerUpload('calc', index)"
+                      @click="openBuktiModal('calc', index)"
                     >
                       <PaperclipIcon class="h-3.5 w-3.5" />
-                      {{ uploadingKey === `calc-${index}` ? 'Mengunggah...' : 'Upload' }}
+                      Upload
                     </button>
                   </div>
                 </td>
@@ -435,7 +437,10 @@
           <tbody>
             <tr v-for="(item, index) in sppd.rincian" :key="item.id" class="border-b border-gray-100 transition-colors hover:bg-gray-50/50 dark:border-gray-800 dark:hover:bg-white/[0.02]">
               <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ index + 1 }}</td>
-              <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ item.uraian }}</td>
+              <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ item.uraian }}
+                <span v-if="rincianDetail(item)" class="block text-[11px] text-gray-400 dark:text-gray-500">{{ rincianDetail(item) }}</span>
+              </td>
               <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ item.hari }}</td>
               <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatRupiah(item.satuan) }}</td>
               <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatRupiah(item.jumlah) }}</td>
@@ -454,6 +459,15 @@
                     Lihat
                   </a>
                   <button
+                    v-if="canEdit(menuUrl) && (item.bukti_url || rincianDetail(item))"
+                    type="button"
+                    class="text-gray-400 transition-colors hover:text-brand-500 dark:hover:text-brand-400"
+                    title="Ubah detail bukti"
+                    @click="openBuktiModal('saved', index)"
+                  >
+                    <EditIcon class="h-4 w-4" />
+                  </button>
+                  <button
                     v-if="canEdit(menuUrl) && item.bukti_url"
                     type="button"
                     class="text-gray-400 transition-colors hover:text-error-500 dark:hover:text-error-500"
@@ -463,15 +477,14 @@
                     <TrashIcon class="h-4 w-4" />
                   </button>
                   <button
-                    v-else-if="canEdit(menuUrl)"
+                    v-if="canEdit(menuUrl) && !item.bukti_url"
                     type="button"
-                    :disabled="uploadingKey === `saved-${index}`"
-                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-white/[0.05]"
                     title="Unggah bukti"
-                    @click="triggerUpload('saved', index)"
+                    @click="openBuktiModal('saved', index)"
                   >
                     <PaperclipIcon class="h-3.5 w-3.5" />
-                    {{ uploadingKey === `saved-${index}` ? 'Mengunggah...' : 'Upload' }}
+                    Upload
                   </button>
                   <span v-if="!item.bukti_url && !canEdit(menuUrl)" class="text-xs text-gray-400 dark:text-gray-500">-</span>
                 </div>
@@ -489,18 +502,26 @@
       </div>
       <EmptyState v-else message="Belum ada rincian biaya untuk SPPD ini." />
     </div>
+
+    <BuktiModal
+      :open="buktiModalTarget !== null"
+      :item="buktiModalItem"
+      @close="closeBuktiModal"
+      @saved="handleBuktiSaved"
+    />
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AdminLayout from '../../components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import FileDropzone from '@/components/ui/FileDropzone.vue'
-import { calculateSppd, storeRincian, updateSppd, uploadBukti, uploadDokumen, deleteDokumen } from '@/api/sppd'
-import type { CalculatePayload, Golongan, CalculateResult, FileDokumenJenis } from '@/types/sppd'
+import BuktiModal from '@/components/ui/BuktiModal.vue'
+import { calculateSppd, storeRincian, updateSppd, uploadDokumen, deleteDokumen } from '@/api/sppd'
+import type { CalculatePayload, Golongan, CalculateResult, CalculateRincian, FileDokumenJenis } from '@/types/sppd'
 import { router, Link } from '@inertiajs/vue3'
 import { usePermission } from '@/composables/usePermission'
 import FlagIcon from '@/icons/FlagIcon.vue'
@@ -510,6 +531,7 @@ import SendIcon from '@/icons/SendIcon.vue'
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue'
 import PaperclipIcon from '@/icons/PaperclipIcon.vue'
 import TrashIcon from '@/icons/TrashIcon.vue'
+import EditIcon from '@/icons/EditIcon.vue'
 
 interface SppdProp {
   id: number
@@ -545,6 +567,12 @@ interface SppdProp {
     keterangan: string | null
     bukti: string | null
     bukti_url: string | null
+    maskapai?: string | null
+    no_booking?: string | null
+    no_tiket?: string | null
+    no_penerbangan?: string | null
+    nama_hotel?: string | null
+    no_kamar?: string | null
   }[]
   creator?: { id: number; name: string } | null
   approver?: { id: number; name: string } | null
@@ -618,12 +646,64 @@ const calcResult = ref<CalculateResult | null>(null)
 const calcError = ref('')
 const savingRincian = ref(false)
 const updatingStatus = ref(false)
-const buktiInput = ref<HTMLInputElement | null>(null)
-const uploadTarget = ref<{ scope: 'saved' | 'calc'; index: number } | null>(null)
-const uploadingKey = ref<string | null>(null)
 const uploadError = ref('')
 const uploadingJenis = ref<FileDokumenJenis | null>(null)
 const dokumenError = ref('')
+
+const rincianDetail = (item: {
+  jenis_biaya: string
+  maskapai?: string | null
+  no_booking?: string | null
+  no_tiket?: string | null
+  no_penerbangan?: string | null
+  nama_hotel?: string | null
+  no_kamar?: string | null
+}): string => {
+  if (item.jenis_biaya.startsWith('transport_udara')) {
+    return [
+      item.maskapai ? `Maskapai: ${item.maskapai}` : '',
+      item.no_booking ? `Booking: ${item.no_booking}` : '',
+      item.no_tiket ? `Tiket: ${item.no_tiket}` : '',
+      item.no_penerbangan ? `Penerbangan: ${item.no_penerbangan}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ')
+  }
+  if (item.jenis_biaya === 'penginapan') {
+    return [
+      item.nama_hotel ? `Hotel: ${item.nama_hotel}` : '',
+      item.no_kamar ? `Kamar: ${item.no_kamar}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ')
+  }
+  return ''
+}
+
+const buktiModalTarget = ref<{ scope: 'saved' | 'calc'; index: number } | null>(null)
+const buktiModalItem = computed<CalculateRincian | null>(() => {
+  const target = buktiModalTarget.value
+  if (!target) return null
+  if (target.scope === 'calc') return calcResult.value?.rincian[target.index] ?? null
+  const item = props.sppd.rincian?.[target.index]
+  if (!item) return null
+  return {
+    jenis_biaya: item.jenis_biaya,
+    uraian: item.uraian,
+    hari: item.hari,
+    satuan: item.satuan,
+    jumlah: item.jumlah,
+    keterangan: item.keterangan ?? '',
+    bukti: item.bukti ?? null,
+    bukti_url: item.bukti_url ?? null,
+    maskapai: item.maskapai ?? null,
+    no_booking: item.no_booking ?? null,
+    no_tiket: item.no_tiket ?? null,
+    no_penerbangan: item.no_penerbangan ?? null,
+    nama_hotel: item.nama_hotel ?? null,
+    no_kamar: item.no_kamar ?? null,
+  }
+})
 
 const handleDokumenSelected = async (jenis: FileDokumenJenis, file: File): Promise<void> => {
   uploadingJenis.value = jenis
@@ -664,40 +744,43 @@ const handleDokumenRemove = async (jenis: FileDokumenJenis): Promise<void> => {
   }
 }
 
-const triggerUpload = (scope: 'saved' | 'calc', index: number): void => {
-  uploadTarget.value = { scope, index }
+const openBuktiModal = (scope: 'saved' | 'calc', index: number): void => {
+  buktiModalTarget.value = { scope, index }
   uploadError.value = ''
-  buktiInput.value?.click()
 }
 
-const onBuktiSelected = async (event: Event): Promise<void> => {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  const target = uploadTarget.value
-  if (!file || !target) return
-  uploadingKey.value = `${target.scope}-${target.index}`
-  uploadError.value = ''
+const closeBuktiModal = (): void => {
+  buktiModalTarget.value = null
+}
+
+const handleBuktiSaved = async (item: CalculateRincian): Promise<void> => {
+  const target = buktiModalTarget.value
+  if (!target) return
+  closeBuktiModal()
+  if (target.scope === 'calc') {
+    if (calcResult.value) calcResult.value.rincian[target.index] = item
+    return
+  }
+  const list = (props.sppd.rincian ?? []).map((rincian, i) =>
+    i === target.index
+      ? {
+          ...rincian,
+          bukti: item.bukti ?? null,
+          bukti_url: item.bukti_url ?? null,
+          maskapai: item.maskapai ?? null,
+          no_booking: item.no_booking ?? null,
+          no_tiket: item.no_tiket ?? null,
+          no_penerbangan: item.no_penerbangan ?? null,
+          nama_hotel: item.nama_hotel ?? null,
+          no_kamar: item.no_kamar ?? null,
+        }
+      : rincian,
+  )
   try {
-    const res = await uploadBukti(file)
-    if (target.scope === 'calc') {
-      const item = calcResult.value?.rincian[target.index]
-      if (item) {
-        item.bukti = res.path
-        item.bukti_url = res.url
-      }
-    } else {
-      const list = (props.sppd.rincian ?? []).map((item, index) =>
-        index === target.index ? { ...item, bukti: res.path, bukti_url: res.url } : item,
-      )
-      await storeRincian(props.sppd.id, list)
-      router.reload()
-    }
+    await storeRincian(props.sppd.id, list)
+    router.reload()
   } catch {
-    uploadError.value = 'Gagal mengunggah bukti. Gunakan format PDF/JPG/PNG/WEBP maksimal 5 MB.'
-  } finally {
-    uploadingKey.value = null
-    uploadTarget.value = null
+    uploadError.value = 'Gagal menyimpan detail bukti. Silakan coba lagi.'
   }
 }
 
